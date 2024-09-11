@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project 1: CS 180</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            margin-bottom: 10px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        .image-gallery {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap; /* Allows images to wrap after 3 images */
+            gap: 20px;
+        }
+        .image-item {
+            text-align: center;
+            margin: 10px;
+            flex-basis: calc(33.33% - 40px); /* Sets 3 images per row */
+            max-width: 300px; /* Ensure the width does not exceed 300px */
+        }
+        .image-item img {
+            max-height: 300px; /* Sets the max height of the image */
+            width: auto;       /* Maintains aspect ratio */
+        }
+        .description {
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Project 1: Colorizing the Prokudin-Gorskii Photo Collection</h1>
+
+    <!-- Section: Overview -->
+    <section id="overview">
+        <h2>Overview</h2>
+        <p>
+            Sergei Mikhailovich Prokudin-Gorskii (1863-1944) was a Russian photographer who, even in 1907, envisioned color photography as the future. With permission from the Tzar, he traveled across the Russian Empire capturing thousands of images using a unique technique: photographing each scene through red, green, and blue filters on glass plates. Although the technology to print color photos didn't exist at the time, Prokudin-Gorskii imagined a future where his images could be projected in classrooms across Russia to teach students about their vast country. His collection of glass plate negatives was preserved and eventually digitized by the Library of Congress.
+        </p>
+        <p>
+            The goal of this project is to take these digitized glass plate images and use image processing techniques to align the three color channels (red, green, and blue) to produce a full-color image with minimal artifacts. This process involves carefully aligning the three channels to form a single, cohesive RGB image. The project implements several techniques, including splitting color channels, aligning them through an exhaustive search, and further optimizations for larger images.
+        </p>
+    </section>
+
+    <!-- Section: Design Implementation -->
+    <section id="design-implementation">
+        <h2>Design Implementation</h2>
+        <h3>Splitting Channels</h3>
+        <p>
+        The first step involves splitting the original glass plate image into three separate channels: red, green, and blue. This is done by dividing the image vertically, as each color channel occupies one-third of the total image height.
+    </p>
+    <h3>Alignment Through Exhaustive Search</h3>
+        <p>
+        The next step is using exhaustive search over a 15x15 pixel window to find the best possible shift for proper alignment. We explored the following loss functions:
+    </p>
+    <h4>Euclidean Distance</h4>
+    <h4>Normalized Cross-Correlation</h4>
+    <h4>Sum of Squared Difference</h4>
+    <h4>Structural Similarity Index</h4>
+    <p>From testing I determined Normalized Cross-Correlation (with modifications) performed the best over the most images in terms of accuracy and speed. The following images were all produced with NCC.</p>
+
+    <h3>Pyramid Alignment</h3>
+    <p>To handle large pixel displacements in high-resolution images, an image pyramid technique was used to speed up alignment by processing the image at progressively finer scales, starting from a smaller version and refining the alignment as the resolution was increased. </p>
+
+    </section>
+
+    <!-- Section: Improvements -->
+    <section id="improvements">
+        <h2>Improvements</h2>
+        <p>
+            To improve the accuracy of the alignment numerous methods were employed:
+        </p>
+        <h3>Cropping</h3>
+        <p>To account for noise along the edges of images, I auto cropped the surrounding 15% to lower the noise when aligning.</p>
+        <h3>Central Window</h3>
+        <p>Since the further you go to the edge of an image the more noise. I created a focal point in my ncc method where my loss function only looked at the central 100x100 pixel image for small images and 1000x1000 pixel box for larger images.</p>
+        <h3>Sobel (Bells and Whistles)</h3>
+        <p>Using OpenCV's Sobel I used edge detection to properly align the image. This improvement saw significant changes. The Sobel method computes the gradient (rate of change) of pixel intensity in two directions: horizontal and vertical.
+            Using a 3x3 kernal, Sobel identifies areas where there are sharp changes in brightness, which typically correspond to edges. This highlights boundries or edges as seen in the central image below. With all pixels darkened besides the borders, the loss functions are easily able to align the images.</p>
+        <div class="image-gallery">
+            <div class="image-item">
+                <h2>Pre Sobal Image</h2>
+                <img src="media/lady_presobal.jpg" alt="lady_presobal.jpg">
+            </div>
+            
+            <div class="image-item">
+                <h2>Example Sobal Transformed Image</h2>
+                <img src="media/PNG image.png" alt="PNG image.png">
+            </div>
+    
+            <div class="image-item">
+                <h2>New Aligned Image</h2>
+                <img src="media/lady.jpg" alt="lady.jpg">
+            </div>
+        </div>
+    </section>
+    
+    <section id="small-images">
+        <h2>Small Images using Exhaustive Search</h2>
+        <div class="image-gallery">
+            <div class="image-item">
+                <h2>Monastery</h2>
+                <img src="media/monastery_output.jpg" alt="monastery_output.jpg">
+                <div class="description">
+                    <p>Displacement: R=[2, 3], G=[2, -3]</p>
+                </div>
+            </div>
+            
+            <div class="image-item">
+                <h2>Cathedral</h2>
+                <img src="media/cathedral_output.jpg" alt="cathedral_output.jpg">
+                <div class="description">
+                    <p>Displacement: R=[3, 12], G=[2, 5]</p>
+                </div>
+            </div>
+    
+            <div class="image-item">
+                <h2>Tobolsk</h2>
+                <img src="media/tobolsk_output.jpg" alt="tobolsk_output.jpg">
+                <div class="description">
+                    <p>Displacement: R=[3, 6], G=[3, 3]</p>
+                </div>
+            </div>
+        </div>
+    
+    </section>
+
+    <section id="large-scale-images">
+        <h2>Large Scale Images</h2>
+    <div class="image-gallery">
+
+        <div class="image-item">
+            <h2>Church</h2>
+            <img src="media/church.jpg" alt="church.jpg">
+            <div class="description">
+                <p>Displacement: R=[-4, 58], G=[4, 24]</p>
+            </div>
+        </div>
+        
+        <!-- Image Item 2: Emir -->
+        <div class="image-item">
+            <h2>Emir</h2>
+            <img src="media/emir.jpg" alt="emir.jpg">
+            <div class="description">
+                <p>Displacement: R=[41, 106], G=[24, 48]</p>
+            </div>
+        </div>
+
+
+        <div class="image-item">
+            <h2>Harvesters</h2>
+            <img src="media/harvesters.jpg" alt="harvesters.jpg">
+            <div class="description">
+                <p>Displacement: R=[14, 123], G=[17, 59]</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="image-gallery">
+
+        <div class="image-item">
+            <h2>Icon</h2>
+            <img src="media/icon.jpg" alt="icon.jpg">
+            <div class="description">
+                <p>Displacement: R=[23, 90], G=[18, 41]</p>
+            </div>
+        </div>
+
+        <div class="image-item">
+            <h2>Lady</h2>
+            <img src="media/lady.jpg" alt="lady.jpg">
+            <div class="description">
+                <p>Displacement: R=[13, 111], G=[8, 52]</p>
+            </div>
+        </div>
+
+        <div class="image-item">
+            <h2>Melons</h2>
+            <img src="media/melons.jpg" alt="melons.jpg">
+            <div class="description">
+                <p>Displacement: R=[13, 178], G=[10, 82]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="image-gallery">
+        <div class="image-item">
+            <h2>Onion Church</h2>
+            <img src="media/onion_church.jpg" alt="onion_church.jpg">
+            <div class="description">
+                <p>Displacement: R=[37, 108], G=[26, 51]</p>
+            </div>
+        </div>
+
+        <div class="image-item">
+            <h2>Sculpture</h2>
+            <img src="media/sculpture.jpg" alt="sculpture.jpg">
+            <div class="description">
+                <p>Displacement: R=[-27, 140], G=[-11, 33]</p>
+            </div>
+        </div>
+
+        <div class="image-item">
+            <h2>Self Portrait</h2>
+            <img src="media/self_portrait.jpg" alt="self_portrait.jpg">
+            <div class="description">
+                <p>Displacement: R=[37, 175], G=[29, 77]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="image-gallery">
+        <div class="image-item">
+            <h2>Three Generations</h2>
+            <img src="media/three_generations.jpg" alt="three_generations.jpg">
+            <div class="description">
+                <p>Displacement: R=[10, 109], G=[13, 51]</p>
+            </div>
+        </div>
+
+        <div class="image-item">
+            <h2>Train</h2>
+            <img src="media/train.jpg" alt="train.jpg">
+            <div class="description">
+                <p>Displacement: R=[22, 88], G=[16, 40]</p>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="custom-images">
+    <h2>Custom Images</h2>
+    <div class="image-gallery">
+        <div class="image-item">
+            <h2>Na Uralie</h2>
+            <img src="media/custom_image1.jpg" alt="custom_image1.jpg">
+            <div class="description">
+                <p>Displacement: R=[37, 108], G=[26, 51]</p>
+            </div>
+        </div>
+        
+        <div class="image-item">
+            <h2>V Malorossii</h2>
+            <img src="media/custom_image2.jpg" alt="custom_image2.jpg">
+            <div class="description">
+                <p>Displacement: R=[10, 109], G=[13, 51]</p>
+            </div>
+        </div>
+
+        <div class="image-item">
+            <h2>Sunset</h2>
+            <img src="media/sunset.jpg" alt="sunset.jpg">
+            <div class="description">
+                <p>Displacement: R=[387, -186], G=[159, -47]</p>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+
+</body>
+</html>
