@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Project 2: CS 180</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f9f9f9;
+            }
+            h1, h2, h3 {
+                color: #333;
+            }
+            p {
+                color: #555;
+                line-height: 1.6;
+            }
+            .section {
+                background-color: #fff;
+                border-radius: 15px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                margin-bottom: 30px;
+                padding: 20px;
+                transition: box-shadow 0.3s;
+            }
+            .section:hover {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            }
+            .image-gallery {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-bottom: 40px; /* Added space between galleries */
+            }
+            .image-item {
+                text-align: center;
+                flex-basis: calc(33.33% - 40px); /* Ensure 3 images per row */
+                max-width: 300px;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                overflow: hidden;
+                background-color: #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .image-item img {
+                max-width: 100%;
+                height: 200px; /* Uniform height */
+                object-fit: cover;
+            }
+            .image-item div {
+                padding: 10px;
+                font-size: 14px;
+                font-weight: bold;
+                color: #333;
+                background-color: #f0f0f0;
+            }
+            .description {
+                margin-top: 10px;
+                text-align: center;
+                color: #666;
+            }
+            h2 {
+                border-bottom: 2px solid #8fd921;
+                padding-bottom: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Project 2: Fun with Filters and Frequencies</h1>
+        
+        <!-- Section: Overview -->
+        <section id="overview" class="section">
+            <h2>Overview</h2>
+            <p>
+                This project explores various image processing techniques, including sharpening, gradient-based edge detection, and hybrid image blending. Through the use of filters and frequency transformations, I manipulate images to highlight features and create visual effects that range from sharpening details to blending multiple images at different resolutions. 
+            </p>
+        </section>
+        
+        <!-- Section: Part 1.1 -->
+        <section id="part-1.1" class="section">
+            <h2>Part 1.1: Finite Difference Operators</h2>
+            <h3>
+                In this part, I calculated the partial derivatives of the image in both the x and y directions by convolving the image with finite difference operators Dx and Dy. This convolution highlights changes in pixel intensity along each axis, which helps to identify edges in the image. After computing the gradient magnitudes, I generated an edge image by binarizing the gradient magnitude using a threshold, 0.3. This threshold was selected to minimize noise while preserving important edges. Below are the results:
+            </h3>
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/1.1origimg.png" alt="Original Image">
+                    <div>Original Image</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/1.1gradx.png" alt="Grad X">
+                    <div>Grad X</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/1.1grady.png" alt="Grad Y">
+                    <div>Grad Y</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/1.1gradmag.png" alt="Gradient Magnitude">
+                    <div>Gradient Magnitude</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/1.1bingradmag.png" alt="Binarized Gradient Magnitude">
+                    <div>Binarized Gradient Magnitude</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section: Part 1.2 -->
+<section id="part-1.2" class="section">
+    <h2>Part 1.2: Derivative of Gaussian (DoG) Filter</h2>
+    <h3>
+        In this part, I aimed to reduce the noise observed in the previous section by applying a Gaussian filter before computing the finite differences. The Gaussian filter smooths the image by blurring it, which helps to reduce the noise caused by the finite difference operators. Below are the results after convolving the blurred image with the finite difference operators to compute the gradient in the x and y directions, followed by calculating the gradient magnitude and binarizing it:
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/1.2bcdx.png" alt="Grad X">
+            <div>Grad X</div>
+        </div>
+        <div class="image-item">
+            <img src="media/1.2bcdy.png" alt="Grad Y">
+            <div>Grad Y</div>
+        </div>
+        <div class="image-item">
+            <img src="media/1.2gradmag.png" alt="Gradient Magnitude">
+            <div>Gradient Magnitude</div>
+        </div>
+        <div class="image-item">
+            <img src="media/1.2bingradmag.png" alt="Binarized Gradient Magnitude">
+            <div>Binarized Gradient Magnitude</div>
+        </div>
+    </div>
+    <h3>
+        By comparing these results with those from Part 1, it's clear that the application of the Gaussian filter significantly reduces noise, resulting in more distinct and solid edges. The edges in this version appear less fragmented and noisy compared to the results using the raw finite difference operators alone.
+    </h3>
+    <h3>
+        Next, I combined the Gaussian filter and the finite difference operator in one step by computing the Derivative of Gaussian (DoG) filters. This allows for a single convolution instead of two. Below are the images for the DoG filters in the x and y directions, as well as the computed gradient magnitudes:
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/DoGx.png" alt="DoGx">
+            <div>DoGx</div>
+        </div>
+        <div class="image-item">
+            <img src="media/DoGy.png" alt="DoGy">
+            <div>DoGy</div>
+        </div>
+        <div class="image-item">
+            <img src="media/1.2dogx.png" alt="Gradient DogX">
+            <div>Gradient DogX</div>
+        </div>
+        <div class="image-item">
+            <img src="media/1.2dogy.png" alt="Gradient DogY">
+            <div>Gradient DogY</div>
+        </div>
+        <div class="image-item">
+            <img src="media/1.2doggradmag'.png" alt="Dog Gradient Magnitude">
+            <div>Dog Gradient Magnitude</div>
+        </div>
+        <div class="image-item">
+            <img src="media/1.2dogbingradmag.png" alt="Dog Binarized Gradient Magnitude">
+            <div>Dog Binarized Gradient Magnitude</div>
+        </div>
+    </div>
+    <h3>
+        The results produced by the DoG filters are nearly identical to those obtained by first applying the Gaussian blur and then using finite differences. This demonstrates that combining these steps into a single convolution achieves the same outcome while improving computational efficiency.
+    </h3>
+</section>
+
+
+       <!-- Section: Part 2.1 -->
+<section id="part-2.1" class="section">
+    <h2>Part 2.1: Sharpening Images</h2>
+    <h3>
+        In this part, I applied the unsharp masking technique to sharpen various images. The idea behind unsharp masking is to enhance the high-frequency details of an image, which are often perceived as sharpness. This is done by first applying a Gaussian blur to the image, which acts as a low-pass filter that removes the high-frequency details. By subtracting the blurred image from the original, we isolate the high-frequency components. We then add back a scaled version of these high frequencies to the original image, enhancing the sharpness.
+    </h3>
+    
+    <!-- Image 1: Taj Mahal -->
+    <h3>Results on the Taj Mahal Image:</h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/2.1taj.jpg" alt="Original Image">
+            <div>Original Image</div>
+        </div>
+        <div class="image-item">
+            <img src="media/2.1taj2.png" alt="Alpha = 2">
+            <div>Sharpened Image (Alpha = 2)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/2.1taj5.png" alt="Alpha = 5">
+            <div>Sharpened Image (Alpha = 5)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/2.1taj10.png" alt="Alpha = 10">
+            <div>Sharpened Image (Alpha = 10)</div>
+        </div>
+    </div>
+    <h3>
+        As we increase the alpha value, the image becomes progressively sharper, but higher alpha values can also introduce some artifacts or make the image look overly processed. For example, at Alpha = 10, the image appears significantly sharper, but some of the natural details may be exaggerated.
+    </h3>
+
+    <!-- Image 2: Mountain -->
+    <h3>Results on the Mountain Image:</h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/mountain.jpg" alt="Original Image">
+            <div>Original Image</div>
+        </div>
+        <div class="image-item">
+            <img src="media/mountain2.png" alt="Alpha = 2">
+            <div>Sharpened Image (Alpha = 2)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/mountain5.png" alt="Alpha = 5">
+            <div>Sharpened Image (Alpha = 5)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/mountain10.png" alt="Alpha = 10">
+            <div>Sharpened Image (Alpha = 10)</div>
+        </div>
+    </div>
+    <h3>
+        Similar to the Taj Mahal image, the mountain image shows noticeable sharpening with higher alpha values. However, the textures of natural features like rocks and trees may appear overly enhanced at higher alpha settings.
+    </h3>
+
+    <!-- Image 3: Eiffel Tower -->
+    <h3>Resharpening a Blurred Image (Eiffel Tower):</h3>
+    <p>
+        I took a sharp image of the Eiffel Tower, applied a Gaussian blur to it, and then attempted to restore its sharpness using the unsharp masking technique.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/eiffel.webp" alt="Original Image">
+            <div>Original Image</div>
+        </div>
+        <div class="image-item">
+            <img src="media/blurred_eiffel.png" alt="Blurred">
+            <div>Blurred Image</div>
+        </div>
+        <div class="image-item">
+            <img src="media/eiffel2.png" alt="Alpha = 2">
+            <div>Resharpened Image (Alpha = 2)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/eiffel10.png" alt="Alpha = 10">
+            <div>Resharpened Image (Alpha = 10)</div>
+        </div>
+    </div>
+    <h3>
+        After applying the blur and then attempting to sharpen the image again, we can see that some sharpness is restored. However, since the high-frequency details are lost during the initial blur, the sharpened result doesn't fully recover the original level of detail.
+    </h3>
+</section>
+
+
+        <!-- Section: Part 2.2 -->
+<section id="part-2.2" class="section">
+    <h2>Part 2.2: Hybrid Images</h2>
+    <h3>
+        In this part, I created hybrid images by combining the high-frequency details of one image with the low-frequency details of another. The concept behind hybrid images is that they appear differently when viewed up close versus at a distance. At close range, high-frequency details dominate, whereas, at a distance, only the low-frequency components are visible. 
+    </h3>
+
+    <!-- Nutmeg and Derek Hybrid Example -->
+    <h3>Example 1: Hybrid Image of Nutmeg and Derek</h3>
+    <p>
+         The high-frequency components from Nutmeg were combined with the low-frequency components from Derek. The result is a hybrid image that looks like Nutmeg from up close but transitions into Derek’s face when viewed from far away.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/nutmeg.jpg" alt="Nutmeg">
+            <div>Nutmeg (Low Frequency)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/DerekPicture.jpg" alt="Derek">
+            <div>Derek (High Frequency)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/dernut.png" alt="DerNut">
+            <div>Hybrid Image (DerNut)</div>
+        </div>
+    </div>
+
+    <!-- Frequency Domain Analysis for Nutmeg and Derek -->
+    <h3>Frequency Domain Analysis for Nutmeg and Derek</h3>
+    <p>
+        I performed a Fourier transform on the images to analyze their frequency components. The log magnitude of the Fourier transform shows how much each frequency contributes to the overall image. The low-pass filtered version of Derek keeps only the low-frequency information, while the high-pass filtered Nutmeg emphasizes the high-frequency details.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/dereksf.png" alt="FFT Derek">
+            <div>FFT of Derek</div>
+        </div>
+        <div class="image-item">
+            <img src="media/dereklow.png" alt="Lowpass Filter Derek">
+            <div>Lowpass Filtered Derek</div>
+        </div>
+        <div class="image-item">
+            <img src="media/nutmegs.png" alt="FFT Nutmeg">
+            <div>FFT of Nutmeg</div>
+        </div>
+        <div class="image-item">
+            <img src="media/nutmeghigh.png" alt="Highpass Nutmeg">
+            <div>Highpass Filtered Nutmeg</div>
+        </div>
+        <div class="image-item">
+            <img src="media/hybrid.png" alt="Hybrid">
+            <div>Hybrid Image</div>
+        </div>
+    </div>
+
+    <!-- Expression Change Example (Kamala) -->
+    <h3>Example 2: Expression Change of Kamala</h3>
+    <p>
+        In this example, I created a hybrid image by blending two facial expressions of the same person: one with a neutral expression and one with a smile. The low-frequency components of the neutral face are combined with the high-frequency components of the smiling face. From a distance, the image looks neutral, but as you move closer, the smile becomes more apparent.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/kamala.jpg" alt="Smile">
+            <div>Smile (High Frequency)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/kamala2.jpg" alt="Neutral">
+            <div>Neutral (Low Frequency)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/kamalamix.png" alt="Mix">
+            <div>Hybrid Image (Smile/Neutral)</div>
+        </div>
+    </div>
+
+    <!-- Object Morph Example (Fork and Spoon) -->
+    <h3>Example 3: Failed Morph Between Objects - Fork and Spoon</h3>
+    <p>
+        I attempted to create a spork. A fork from up close but a spoon from afar. However, the results weren't what I expected. The fork appears invisible. I believe this is because there is too much overlap of the same color. Causing the fork to become invisible or ghostly. I attempted playing with the background using a grey and white background for the fork. However, there was no success. I additionally played with the lowpass and highpass sigma values, however it never fixed the issue of the spoon overpowering the invisible fork.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/fork2.jpg" alt="Fork">
+            <div>Fork (High Frequency)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/spoon.webp" alt="Spoon">
+            <div>Spoon (Low Frequency)</div>
+        </div>
+        <div class="image-item">
+            <img src="media/spork.png" alt="Spork">
+            <div>Hybrid Image (Spork)</div>
+        </div>
+    </div>
+</section>
+
+
+        <!-- Section: Part 2.3 -->
+<section id="part-2.3" class="section">
+    <h2>Part 2.3: Gaussian and Laplacian Stacks</h2>
+    <p>
+        In this part, I implemented Gaussian and Laplacian stacks, which are used for multi-resolution image blending. The Gaussian stack captures progressively smoother versions of the image by repeatedly applying Gaussian filters at each level without downsampling. 
+    </p>
+
+    <!-- Gaussian Stack Examples (Apple and Orange) -->
+    <h3>Gaussian Stack</h3>
+    <div class="image-gallery">
+        <div class="image-item" style="flex-basis: 100%; max-width: 100%;">
+            <img src="media/guassian_apple.png" alt="Gaussian Apple" style="width: 100%; height: auto;">
+            <div>Gaussian Stack: Apple</div>
+        </div>
+        <div class="image-item" style="flex-basis: 100%; max-width: 100%;">
+            <img src="media/guassian_orange.png" alt="Gaussian Orange" style="width: 100%; height: auto;">
+            <div>Gaussian Stack: Orange</div>
+        </div>
+    </div>
+
+    <!-- Laplacian Stack Examples (Apple and Orange) -->
+    <h3>Laplacian Stack</h3>
+    <p>
+        The Laplacian stack captures details lost between consecutive levels of the Gaussian stack. By subtracting the Gaussian blurred image at one level from the next level, we isolate the band-pass features, effectively capturing the details that lie between high and low-frequency components. 
+    </p>
+    <div class="image-gallery">
+        <div class="image-item" style="flex-basis: 100%; max-width: 100%;">
+            <img src="media/laplacian_apple.png" alt="Laplacian Apple" style="width: 100%; height: auto;">
+            <div>Laplacian Stack: Apple</div>
+        </div>
+        <div class="image-item" style="flex-basis: 100%; max-width: 100%;">
+            <img src="media/laplacian_orange.png" alt="Laplacian Orange" style="width: 100%; height: auto;">
+            <div>Laplacian Stack: Orange</div>
+        </div>
+    </div>
+</section>
+
+
+        <!-- Section: Part 2.4 -->
+        <section id="part-2.4" class="section">
+            <h2>Part 2.4: Multiresolution Blended Images</h2>
+            <h3>Here I used a variety of masks to combine images. The first example uses the part above and is the final result of the blur. The image between two animals was slightly more complex as I had to use a smoother blur to combine it changing the mask. The final example shows a custom mask. I used an AI cropper in Photoshop to create a layer on the original Woody image to create a black and white mask. I then overlayed this with the image and using the same stack procedure as before I put Woody in the Plains.</h3>
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/apple.jpeg" alt="Apple">
+                    <div>Apple</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/oraple.png" alt="Oraple">
+                    <div>Oraple</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/orange.jpeg" alt="Orange">
+                    <div>Orange</div>
+                </div>
+            </div>
+
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/lion.jpg" alt="Lion">
+                    <div>Lion</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/2.4mixedimg.png" alt="Winter/Summer King">
+                    <div>Winter/Summer King</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/wolf.jpg" alt="Wolf">
+                    <div>Wolf</div>
+                </div>
+            </div>
+
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/woody.jpg" alt="Woody">
+                    <div>Woody</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/plains.jpg" alt="Plains">
+                    <div>Plains</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/whitey.jpeg" alt="Mask">
+                    <div>Mask</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/woodyintheplains.png" alt="Woody in the Plains">
+                    <div>Woody in the Plains</div>
+                </div>
+            </div>
+            <div class="image-gallery">
+                <div class="image-item" style="flex-basis: 100%; max-width: 100%;">
+                    <img src="media/wolflap.png" alt="Gaussian Apple" style="width: 100%; height: auto;">
+                    <div>Laplacian Stack Wolf</div>
+                </div>
+                <div class="image-item" style="flex-basis: 100%; max-width: 100%;">
+                    <img src="media/lionlap.png" alt="Gaussian Orange" style="width: 100%; height: auto;">
+                    <div>Laplacian Stack Lion</div>
+                </div>
+            </div>
+        </section>
+
+    </body>
+</html>
