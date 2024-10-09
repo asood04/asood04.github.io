@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Project 2: CS 180</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f9f9f9;
+            }
+            h1, h2, h3 {
+                color: #333;
+            }
+            p {
+                color: #555;
+                line-height: 1.6;
+            }
+            .section {
+                background-color: #fff;
+                border-radius: 15px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                margin-bottom: 30px;
+                padding: 20px;
+                transition: box-shadow 0.3s;
+            }
+            .section:hover {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            }
+            .image-gallery {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-bottom: 40px; /* Added space between galleries */
+            }
+            .image-item {
+                text-align: center;
+                flex-basis: calc(33.33% - 40px); /* Ensure 3 images per row */
+                max-width: 300px;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                overflow: hidden;
+                background-color: #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .image-item img {
+                max-width: 100%;
+                height: 200px; /* Uniform height */
+                object-fit: cover;
+            }
+            .image-item div {
+                padding: 10px;
+                font-size: 14px;
+                font-weight: bold;
+                color: #333;
+                background-color: #f0f0f0;
+            }
+            .description {
+                margin-top: 10px;
+                text-align: center;
+                color: #666;
+            }
+            h2 {
+                border-bottom: 2px solid #8fd921;
+                padding-bottom: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Project 3: Face Morphing</h1>
+        
+        <!-- Section: Overview -->
+        <section id="overview" class="section">
+            <h2>Overview</h2>
+            <p>
+
+                In this project, I am creating a morph animation by combining both shape warping and color blending between two images. The process has two main components: color blending, or cross-dissolving, and shape warping. While blending colors is relatively simple, the real challenge lies in accurately warping the shape of one image to match the other. To achieve smooth transformations, I define correspondences between key facial features, such as aligning the eyes, mouth, chin, and ears in both images. This careful mapping ensures that the transition looks natural and fluid, producing a seamless morph effect.
+            </p>
+        </section>
+        
+        <!-- Section: Part 1.1 -->
+        <section id="part-1.1" class="section">
+            <h2>Part 1: Defining Correspondences</h2>
+            <h3>
+                To morph two faces, we begin by identifying corresponding points on each face. We then use triangulation based the corresponding points to map out the face. Specifically, we apply Delaunay triangulation to the average of the two point sets. For my example, I used my face and professional basketball player Stephen Curry. Below I show the selected points, Delaunay triangles, and the average of the two Delaunay triangles.
+            </h3>
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/Part1Points.png" alt="Original Image">
+                    <div>My Keypoints</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/Part1PointsSteph.png" alt="Grad X">
+                    <div>Curry's Keypoints</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/mewithtriangulation.png" alt="Grad X">
+                    <div>Delaunay Triangles on Me</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/currywithtrig.png" alt="Grad Y">
+                    <div>Delaunay Triangles on Curry</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/avgtriangleshape.png" alt="Binarized Gradient Magnitude">
+                    <div>Average Delaunay Triangles</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section: Part 1.2 -->
+<section id="part-1.2" class="section">
+    <h2>Part 2: Computing the "Mid-way Face"</h2>
+    <h3>
+        To create a mid-way face between two different faces, the first step is to compute the average shape by finding the mean of each corresponding point between the two faces. This average set of points then serves as the basis for Delaunay triangulation. Next, both faces are warped to match this average shape. This involves using an affine transformation matrix to adjust each triangle in the triangulation so that it aligns with the corresponding triangle in the average shape. Finally, the colors of the warped faces are blended together.
+
+For the warping process, I used skimage.draw.polygon to generate a triangular mask from the vertices, allowing for efficient warping of all points within each triangle simultaneously. I use bilinear interpolation to provide color accuracy of each of the triangles. The result is a blended image where you can see the features of each person. 
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/aaditproj3 (1).jpg" alt="Grad X">
+            <div>Aadit</div>
+        </div>
+        <div class="image-item">
+            <img src="media/midwayface.png" alt="Grad Y">
+            <div>Mid-way Face</div>
+        </div>
+        <div class="image-item">
+            <img src="media/curryproj32 (1).jpg" alt="Gradient Magnitude">
+            <div>Curry</div>
+        </div>
+    </div>
+</section>
+
+
+       <!-- Section: Part 2.1 -->
+<section id="part-3" class="section">
+    <h2>Part 3: The Morph Sequence</h2>
+    <h3>
+        To create the morph sequence, I used a similar method as part 2, however using fractions I manipulated how much each image is portrayed in a morph. When a parameter was 0, I was the full image, however when the fraction was 1 the full image was Steph Curry. For each of the 45 frames a different weightage of each image is seen producing the morph sequence below. One key optimization I made was using nearest neighbor to optimize the function rather than using interpolation. Esentially rather than interpolating everytime we use the color of the nearest neighbor to speed up the process.
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/morph_sequence.gif" alt="Animated GIF">
+            <div>Morph Sequence</div>
+        </div>
+    </div>
+</section>
+
+
+        <!-- Section: Part 2.2 -->
+<section id="part-2.2" class="section">
+    <h2>Part 4: The "Mean face" of a population</h2>
+    <h3>
+        In this part I used the FEI Face database, which has 200 images from both male and females containing them smiling and a nuetral face. For this phase, I only used the nuetral faces. This database came with precropped images as well as 46 keypoints for each image. I added an additional 4 points on the corners to better help with mapping along the edges. To find the average shape I found the mean of all the keypoints and then I warped each face into the set of keypoints I found and used cross-disolving to get the average colororation. Below is the average face I obtained: 
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/avgface.png" alt="face">
+            <div>Average Face</div>
+        </div>
+    </div>
+    <h3>Below are 3 examples of sample points warped to the average face. I demonstrated a variety of race and gender for the examples:</h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/orig1a.png" alt="FFT Derek">
+            <div>Original 1a</div>
+        </div>
+        <div class="image-item">
+            <img src="media/morph1a.png" alt="Lowpass Filter Derek">
+            <div>Morphed 1a with Average Face</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/orig10a.png" alt="FFT Derek">
+            <div>Original 10a</div>
+        </div>
+        <div class="image-item">
+            <img src="media/morph10a.png" alt="Lowpass Filter Derek">
+            <div>Morphed 10a with Average Face</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/12aorig.png" alt="FFT Derek">
+            <div>Original 12a</div>
+        </div>
+        <div class="image-item">
+            <img src="media/12amorph.png" alt="Lowpass Filter Derek">
+            <div>Morphed 12a with Average Face</div>
+        </div>
+    </div>
+    <h3>Below is an image of my face warped to the average person. I believe the reason my ear is appeared blurred is because there were no keypoints in the sample dataset outlining an ear and as you can see in the average face the ears are not seen. I also have the average face morphed onto my face below. I did this by mapping a one to one correspondance to each of the keypoints using Delaunay triangles as before and then warping in the same process as before.</h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/myfacetoavgface.png" alt="FFT Derek">
+            <div>My Face to Average Face</div>
+        </div>
+        <div class="image-item">
+            <img src="media/avgfacetomyface.png" alt="Lowpass Filter Derek">
+            <div>Average Face to My Face</div>
+        </div>
+    </div>
+</section>
+
+
+        <!-- Section: Part 2.3 -->
+<section id="part-2.3" class="section">
+    <h2>Part 5: Caricatures - Extrapolating from the mean</h2>
+    <h3>By leveraging the population averages from the FEI database, we can create caricatures through extrapolation. I approached this by treating the correspondences on my neutral face as a vector p and those on the average expression face as a vector q. I then calculated new target correspondences using the formula p+1.5(q−p), found the extrapolated triangulation, and warped my face to align with these exaggerated target points. You can see from the images how negative numbers squish my face, while positive numbers >1 widen my face. By paying close attention to features like the mouth and nose you can distinctly see this difference.</h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/origface.png" alt="Gaussian Apple" >
+            <div>Original Image</div>
+        </div>
+        <div class="image-item" >
+            <img src="media/carciture-0.9.png" alt="Gaussian Orange" >
+            <div>Caricature alpha=-0.9</div>
+        </div>
+        <div class="image-item" >
+            <img src="media/carciture-0.5.png" alt="Laplacian Apple" >
+            <div> Caricature alpha=-0.5</div>
+        </div>
+        <div class="image-item" >
+            <img src="media/carciture1.1.png" alt="Laplacian Orange" >
+            <div>Caricature alpha=1.1</div>
+        </div>
+    </div>
+
+</section>
+
+
+        <!-- Section: Part 2.4 -->
+        <section id="part-2.4" class="section">
+            <h2>Bells and Whistles</h2>
+            <h3>
+                For my Bells and Whistles I decided to change both my gender and ethnicity of my face. I did this by first morphing my face onto a chinese woman. I then morphed the coloration using cross-disolve. I then put the two together to obtain the final result.
+            </h3>
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/origface.png" alt="Apple">
+                    <div>My Face</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/chineseaveragewoman.webp" alt="Oraple">
+                    <div>Average Chinese Woman</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/metoasian.png" alt="Orange">
+                    <div>Shape Morph</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/crossdisolve.png" alt="Oraple">
+                    <div>Appearence Morph</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/fullmorph.png" alt="Orange">
+                    <div>Full Morph</div>
+                </div>
+            </div>
+        </section>
+
+    </body>
+</html>
