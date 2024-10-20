@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Project 4a: CS 180</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f9f9f9;
+            }
+            h1, h2, h3 {
+                color: #333;
+            }
+            p {
+                color: #555;
+                line-height: 1.6;
+            }
+            .section {
+                background-color: #fff;
+                border-radius: 15px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                margin-bottom: 30px;
+                padding: 20px;
+                transition: box-shadow 0.3s;
+            }
+            .section:hover {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            }
+            .image-gallery {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-bottom: 40px; /* Added space between galleries */
+            }
+            .image-item {
+                text-align: center;
+                flex-basis: calc(33.33% - 40px); /* Ensure 3 images per row */
+                max-width: 300px;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                overflow: hidden;
+                background-color: #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .image-item img {
+                max-width: 100%;
+                height: 200px; /* Uniform height */
+                object-fit: cover;
+            }
+            .image-item div {
+                padding: 10px;
+                font-size: 14px;
+                font-weight: bold;
+                color: #333;
+                background-color: #f0f0f0;
+            }
+            .middle-image-item {
+                flex-basis: calc(50% - 40px); /* Adjust width to take more space */
+                max-width: 400px; /* Set max width for middle image */
+            }
+            .description {
+                margin-top: 10px;
+                text-align: center;
+                color: #666;
+            }
+            h2 {
+                border-bottom: 2px solid #8fd921;
+                padding-bottom: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Project 4a: Image Warping and Mosaicing</h1>
+        
+        <!-- Section: Overview -->
+        <section id="overview" class="section">
+            <h2>Overview</h2>
+            <p>
+                For the first part of this project, I will be creating a homogrophy function and a warping function for the purpose of rectifying an image and creating a mosaic or a stictching a multiple images. 
+            </p>
+        </section>
+        
+        <!-- Section: Part 1.1 -->
+        <section id="part-1.1" class="section">
+            <h2>Shoot the Pictures</h2>
+            <h3>
+                To begin I shot some pictures with large overlap such that I can stitch together to create a larger image later on in the project. Below are some examples:
+            </h3>
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/kitchen_left.jpg" alt="Original Image">
+                    <div>Left Kitchen</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/kitchen_right.jpg" alt="Grad X">
+                    <div>Right Kitchen</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/kitchenl_annotated.png" alt="Grad X">
+                    <div>Annotated Image</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/kitchenr_annotated.png" alt="Grad X">
+                    <div>Annotated Image</div>
+                </div>
+            </div>
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/room_left.jpg" alt="Original Image">
+                    <div>Left Room</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/room_right.jpg" alt="Grad X">
+                    <div>Right Room</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/rooml_annotated.png" alt="Grad X">
+                    <div>Annotated Image</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/roomr_annotated.png" alt="Grad X">
+                    <div>Annotated Image</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section: Part 1.2 -->
+<section id="part-1.2" class="section">
+    <h2>Recovering Homographies</h2>
+    <p>
+        The homography matrix, \( H \), is a 3x3 matrix that maps points from one plane to another through a projective transformation. Given a set of corresponding points in two images, the goal is to find the matrix \( H \) that transforms a point \( (x, y) \) from the first image to a point \( (x', y') \) in the second image. The transformation can be written as:
+        </p>
+        <p>
+        \[
+        \begin{bmatrix}
+        x' \\
+        y' \\
+        1
+        \end{bmatrix}
+        =
+        H
+        \begin{bmatrix}
+        x \\
+        y \\
+        1
+        \end{bmatrix}
+        \]
+        </p>
+        <p>
+        The homography matrix \( H \) has 8 unknowns, as the last element is set to 1 for the scaling of the image. The matrix is of the form:
+        </p>
+        <p>
+        \[
+        H = 
+        \begin{bmatrix}
+        h_{11} & h_{12} & h_{13} \\
+        h_{21} & h_{22} & h_{23} \\
+        h_{31} & h_{32} & 1
+        \end{bmatrix}
+        \]
+        </p>
+        <p>
+        For each pair of corresponding points \( (x, y) \) in the first image and \( (x', y') \) in the second image, we can derive two linear equations by rearranging the transformation:
+        </p>
+        <p>
+        \[
+        x' = \frac{h_{11}x + h_{12}y + h_{13}}{h_{31}x + h_{32}y + 1}, \quad y' = \frac{h_{21}x + h_{22}y + h_{23}}{h_{31}x + h_{32}y + 1}
+        \]
+        </p>
+        <p>
+        Multiplying both sides by the denominators to eliminate the fractions, we get:
+        </p>
+        <p>
+        \[
+        x'(h_{31}x + h_{32}y + 1) = h_{11}x + h_{12}y + h_{13}
+        \]
+        \[
+        y'(h_{31}x + h_{32}y + 1) = h_{21}x + h_{22}y + h_{23}
+        \]
+        </p>
+
+        <p>
+        Rearranging terms, we obtain a system of linear equations of the form \( A h = b \), where \( h \) is the vector of unknowns:
+        </p>
+        <p>
+        \[
+        A = 
+        \begin{bmatrix}
+        x & y & 1 & 0 & 0 & 0 & -x'x & -x'y \\
+        0 & 0 & 0 & x & y & 1 & -y'x & -y'y
+        \end{bmatrix}
+        \]
+        </p>
+        <p>
+        \[
+        b = 
+        \begin{bmatrix}
+        x' \\
+        y'
+        \end{bmatrix}
+        \]
+        </p>
+        <p>
+        By stacking these equations for all corresponding points, we can solve the linear system using least squares to estimate the homography matrix \( H \).
+        </p>
+        
+</section>
+
+       <!-- Section: Part 2.1 -->
+<section id="part-3" class="section">
+    <h2>Rectifying The Image</h2>
+    <h3>
+        Rectification is the process of transofrming an image to appear from a different perspective. In the following examples I take a side view and show the front view of all three objects. First the user selects 4 corner points of the object of the angled image. Then I compute the Homogrophy matrix for the image to map it to a perfect rectangle, a front facing view. I then use the matrix to warp the image into the new perspective. In the warping function, I first generate a grid of coordinates corresponding to the pixel positions in the output (rectified) image.  To map each pixel from the output image back to the corresponding location in the input image, we apply the inverse homography matrix. I then normalize and map each point from the warped image to the original forming the warped image.
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/rectangular_painting.jpg" alt="Animated GIF">
+            <div>Painting</div>
+        </div>
+        <div class="image-item">
+            <img src="media/rectified_painting.png" alt="Animated GIF">
+            <div>Rectifieid Painting</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/cereal.jpg" alt="Animated GIF">
+            <div>Cereal</div>
+        </div>
+        <div class="image-item">
+            <img src="media/rectified_cereal.png" alt="Animated GIF">
+            <div>Rectified Cereal</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/book.jpg" alt="Animated GIF">
+            <div>Book</div>
+        </div>
+        <div class="image-item">
+            <img src="media/rectified_book.png" alt="Animated GIF">
+            <div>Rectified Book</div>
+        </div>
+    </div>
+</section>
+
+
+        <!-- Section: Part 2.2 -->
+<section id="part-2.2" class="section">
+    <h2>Creating Mosaics</h2>
+    <h3>
+        For creating the mosaics below I used the same process for all three. I first selected 20 common points in the right and left image. I used the left image as a base and warped my right image to match. The warping process involved using the homogrophy matrix described before. To manage the warped image dimensions and uniformity between the two dimensions, I calculated bounding boxes. This allowed me to set the dimensions of the canvas so that I could then blend the two images together onto the canvas. 
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/kitchen_left.jpg" alt="FFT Derek">
+            <div>Kitchen Left</div>
+        </div>
+        <div class="middle-image">
+            <img src="media/kitchen_mosaic.png" alt="Lowpass Filter Derek">
+        </div>
+        <div class="image-item">
+            <img src="media/kitchen_right.jpg" alt="Lowpass Filter Derek">
+            <div>Kitchen Right</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/street_left.jpg" alt="FFT Derek">
+            <div>Street Left</div>
+        </div>
+        <div class="middle-image">
+            <img src="media/street_mosaic.png" alt="Lowpass Filter Derek">
+        </div>
+        <div class="image-item">
+            <img src="media/street_right.jpg" alt="Lowpass Filter Derek">
+            <div>Street Right</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/room_left.jpg" alt="FFT Derek">
+            <div>Room Left</div>
+        </div>
+        <div class="">
+            <img src="media/room_mosaic.png" alt="Lowpass Filter Derek">
+        </div>
+        <div class="image-item">
+            <img src="media/room_right.jpg" alt="Lowpass Filter Derek">
+            <div>Room Right</div>
+        </div>
+    </div>
+</section>
+
+    </body>
+</html>
