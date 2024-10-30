@@ -297,5 +297,180 @@
     </div>
 </section>
 
+<h1>Project 4b: Feature Matching for Autostitching</h1>
+<section id="part-2.3" class="section">
+    <h2>Detecting Corner Features in an Image</h2>
+    <h3>
+        I used Harris Corner Detection to identify key points in each image by detecting areas with significant intensity variation in multiple directions. This method highlights "corners" that are stable and distinctive, making them ideal for matching across images.
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/vlsb_harris_l.png" alt="FFT Derek">
+            <div>VLSB Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/vlsb_harris_r.png" alt="Lowpass Filter Derek">
+            <div>VLSB Right</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/st_l_harris.png" alt="FFT Derek">
+            <div>Street Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/st_h_harris.png" alt="Lowpass Filter Derek">
+            <div>Street Right</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/sun_haris_l.png" alt="FFT Derek">
+            <div>Sunset Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/sun_haris_r.png" alt="Lowpass Filter Derek">
+            <div>Sunset Right</div>
+        </div>
+    </div>
+    
+</section>
+<section id="part-2.3" class="section">
+    <h2>Adaptive Non-Maximal Suppression</h2>
+    <h3>
+        For the next step, I applied Adaptive Non-Maximal Suppression (ANMS) to refine the detected corners. ANMS selects the most spatially distinct corners by suppressing those that are too close to stronger corners, ensuring an even distribution of key points across the image. This results in a set of well-spaced, high-quality feature points for more accurate matching.
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/anms_left.png" alt="FFT Derek">
+            <div>VLSB Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/anms_right.png" alt="Lowpass Filter Derek">
+            <div>VLSB Right</div>
+        </div>
+       
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/st_l_anms.png" alt="FFT Derek">
+            <div>Street Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/st_r_anms.png" alt="Lowpass Filter Derek">
+            <div>Street Right</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/anms_l_sun.png" alt="FFT Derek">
+            <div>Sunset Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/sun_anms_r.png" alt="Lowpass Filter Derek">
+            <div>Sunset Right</div>
+        </div>
+    </div>
+    
+</section>
+<section id="part-2.3" class="section">
+    <h2>Feature Matching</h2>
+    <h3>
+        In this step, I extracted feature descriptors from each selected corner point. In the get_patches function, for each point I took an axis-aligned 8x8 patch sampled from a larger 40x40 region around the point. This larger window allows for a smoother, more informative descriptor by reducing noise through blurring. Finally, I normalized each descriptor to ensure consistency across varying lighting conditions and image scales. In the feature matching step, I implemented a function that pairs similar features between two images based on the extracted descriptors. This process allows us to find corresponding points in both images, which is essential for aligning and stitching them together. 
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/vlsb_patch.png" alt="FFT Derek">
+            <div>VLSB Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/vlsb_patch_r.png" alt="FFT Derek">
+            <div>VLSB Right</div>
+        </div>
+        
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/st_l_fe.png" alt="FFT Derek">
+            <div>Street Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/st_r_fe.png" alt="Lowpass Filter Derek">
+            <div>Street Right</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/sun_fea_l.png" alt="FFT Derek">
+            <div>Sunset Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/sun_fea_r.png" alt="Lowpass Filter Derek">
+            <div>Sunset Right</div>
+        </div>
+    </div>
+</section>
+<section id="part-2.3" class="section">
+    <h2>RANSAC</h2>
+    <h3>
+        Features can still be incorrectly matched due to noise. To fix this I use RANSAC, a method that iteratively selects random sets of feature correspondences to estimate the homography matrix. By analyzing the inliers and discarding outliers, RANSAC ensure accurate matches are used for the final alignment.
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/vlsb_ransac_l.png" alt="FFT Derek">
+            <div>VLSB Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/vlsb_ransac_r.png" alt="FFT Derek">
+            <div>VLSB Right</div>
+        </div>
+        
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/stlr.png" alt="FFT Derek">
+            <div>Street Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/strr.png" alt="Lowpass Filter Derek">
+            <div>Street Right</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/sun_ransac_l.png" alt="FFT Derek">
+            <div>Sunset Left</div>
+        </div>
+        <div class="image-item">
+            <img src="media/sun_ransac_r.png" alt="Lowpass Filter Derek">
+            <div>Sunset Right</div>
+        </div>
+    </div>
+</section>
+<section id="part-2.3" class="section">
+    <h2>Autostitched Image</h2>
+    <h3>
+        Using similar functions to part 4a, I use the RANSAC points to compute a final mosaic. Here is the above example, along with a few more mosaics. The street and sunset did not turn out how I wanted them too. I believe there was an issue with my blending which I could not resolve as the points as seen before all look right.
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/vlsb_fin.png" alt="FFT Derek">
+            <div>VLSB</div>
+        </div>
+        <div class="image-item">
+            <img src="media/street_fin.png" alt="FFT Derek">
+            <div>Street</div>
+        </div>
+        <div class="image-item">
+            <img src="media/download-1.png" alt="FFT Derek">
+            <div>Sunset</div>
+        </div>
+    </div>
+
+
+</section>
+<section>
+    <h2>What I learned: The coolest thing I learned was RANSAC. From expirementing I saw how an alogorithm like RANSAC can be used to accurately find points from a sea of points using the method described above. I found it cool to see how we were able to take something that we used to manually stitch and by following a paper we were able to automate it. </h2>
+</section>
     </body>
 </html>
