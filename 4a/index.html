@@ -81,7 +81,7 @@
         <section id="overview" class="section">
             <h2>Overview</h2>
             <p>
-                For the first part of this project, I will be creating a homogrophy function and a warping function for the purpose of rectifying an image and creating a mosaic or a stictching a multiple images. 
+                For the first part of this project, I will be creating a homogrophy function and a warping function for the purpose of rectifying an image and creating a mosaic or a stictching a multiple images. For the second part,  I developed an automated correspondence detection tool to enable mosaic creation without manual point selection. I implemented Adaptive Non-Maximal Suppression, Feature Descriptor extraction and matching, and RANSAC, following the methods outlined in the paper "Multi-Image Matching using Multi-Scale Oriented Patches" by Brown et al.
             </p>
         </section>
         
@@ -305,32 +305,32 @@
     </h3>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/vlsb_harris_l.png" alt="FFT Derek">
+            <img src="media/VLSB_hl.png" alt="FFT Derek">
             <div>VLSB Left</div>
         </div>
         <div class="image-item">
-            <img src="media/vlsb_harris_r.png" alt="Lowpass Filter Derek">
+            <img src="media/VLSB_hr.png" alt="Lowpass Filter Derek">
             <div>VLSB Right</div>
         </div>
     </div>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/st_l_harris.png" alt="FFT Derek">
-            <div>Street Left</div>
+            <img src="media/apt_harris_l.png" alt="FFT Derek">
+            <div>Skyline Left</div>
         </div>
         <div class="image-item">
-            <img src="media/st_h_harris.png" alt="Lowpass Filter Derek">
-            <div>Street Right</div>
+            <img src="media/apt_harris_r.png" alt="Lowpass Filter Derek">
+            <div>Skyline Right</div>
         </div>
     </div>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/sun_haris_l.png" alt="FFT Derek">
-            <div>Sunset Left</div>
+            <img src="media/tree_harris_l.png" alt="FFT Derek">
+            <div>Street Left</div>
         </div>
         <div class="image-item">
-            <img src="media/sun_haris_r.png" alt="Lowpass Filter Derek">
-            <div>Sunset Right</div>
+            <img src="media/tree_harris_r.png" alt="Lowpass Filter Derek">
+            <div>Street Right</div>
         </div>
     </div>
     
@@ -353,22 +353,22 @@
     </div>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/st_l_anms.png" alt="FFT Derek">
-            <div>Street Left</div>
+            <img src="media/apt_anms_l.png" alt="FFT Derek">
+            <div>Skyline Left</div>
         </div>
         <div class="image-item">
-            <img src="media/st_r_anms.png" alt="Lowpass Filter Derek">
-            <div>Street Right</div>
+            <img src="media/apt_anms_r.png" alt="Lowpass Filter Derek">
+            <div>Skyline Right</div>
         </div>
     </div>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/anms_l_sun.png" alt="FFT Derek">
-            <div>Sunset Left</div>
+            <img src="media/tree_anms_l.png" alt="FFT Derek">
+            <div>Street Left</div>
         </div>
         <div class="image-item">
-            <img src="media/sun_anms_r.png" alt="Lowpass Filter Derek">
-            <div>Sunset Right</div>
+            <img src="media/tree_anms_r.png" alt="Lowpass Filter Derek">
+            <div>Street Right</div>
         </div>
     </div>
     
@@ -391,29 +391,29 @@
     </div>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/st_l_fe.png" alt="FFT Derek">
-            <div>Street Left</div>
+            <img src="media/apt_fea_l.png" alt="FFT Derek">
+            <div>Skyline Left</div>
         </div>
         <div class="image-item">
-            <img src="media/st_r_fe.png" alt="Lowpass Filter Derek">
-            <div>Street Right</div>
+            <img src="media/apt_fea_r.png" alt="Lowpass Filter Derek">
+            <div>Skyline Right</div>
         </div>
     </div>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/sun_fea_l.png" alt="FFT Derek">
-            <div>Sunset Left</div>
+            <img src="media/tree_fea_l.png" alt="FFT Derek">
+            <div>Street Left</div>
         </div>
         <div class="image-item">
-            <img src="media/sun_fea_r.png" alt="Lowpass Filter Derek">
-            <div>Sunset Right</div>
+            <img src="media/tree_fea_r.png" alt="Lowpass Filter Derek">
+            <div>Street Right</div>
         </div>
     </div>
 </section>
 <section id="part-2.3" class="section">
     <h2>RANSAC</h2>
     <h3>
-        Features can still be incorrectly matched due to noise. To fix this I use RANSAC, a method that iteratively selects random sets of feature correspondences to estimate the homography matrix. By analyzing the inliers and discarding outliers, RANSAC ensure accurate matches are used for the final alignment.
+        Features can still be incorrectly matched due to noise. To fix this I use RANSAC, a method that iteratively selects random sets of feature correspondences to estimate the homography matrix. By analyzing the inliers and discarding outliers, RANSAC ensures accurate matches are used for the final alignment.
     </h3>
     <div class="image-gallery">
         <div class="image-item">
@@ -428,22 +428,22 @@
     </div>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/stlr.png" alt="FFT Derek">
-            <div>Street Left</div>
+            <img src="media/apt_ran_l.png" alt="FFT Derek">
+            <div>Skyline Left</div>
         </div>
         <div class="image-item">
-            <img src="media/strr.png" alt="Lowpass Filter Derek">
-            <div>Street Right</div>
+            <img src="media/apt_ran_r.png" alt="Lowpass Filter Derek">
+            <div>Skyline Right</div>
         </div>
     </div>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/sun_ransac_l.png" alt="FFT Derek">
-            <div>Sunset Left</div>
+            <img src="media/tree_ran_l.png" alt="FFT Derek">
+            <div>Street Left</div>
         </div>
         <div class="image-item">
-            <img src="media/sun_ransac_r.png" alt="Lowpass Filter Derek">
-            <div>Sunset Right</div>
+            <img src="media/tree_ran_r.png" alt="Lowpass Filter Derek">
+            <div>Street Right</div>
         </div>
     </div>
 </section>
@@ -458,19 +458,42 @@
             <div>VLSB</div>
         </div>
         <div class="image-item">
-            <img src="media/street_fin.png" alt="FFT Derek">
-            <div>Street</div>
+            <img src="media/apt_fin.png" alt="FFT Derek">
+            <div>Skyline</div>
         </div>
         <div class="image-item">
-            <img src="media/download-1.png" alt="FFT Derek">
-            <div>Sunset</div>
+            <img src="media/tree_fin.png" alt="FFT Derek">
+            <div>Street</div>
         </div>
     </div>
 
 
 </section>
 <section>
-    <h2>What I learned: The coolest thing I learned was RANSAC. From expirementing I saw how an alogorithm like RANSAC can be used to accurately find points from a sea of points using the method described above. I found it cool to see how we were able to take something that we used to manually stitch and by following a paper we were able to automate it. </h2>
+    <h2>What I learned: The coolest thing I learned was RANSAC. From expirementing I saw how an alogorithm like RANSAC can be used to accurately find points from a sea of points using the method described above. I found it cool to see how we were able to take something that we used to manually stitch and by following a paper we were able to automate it. By far the hardest part for me was warping and I still think I can work on that. For example, in my handstitched images it appears that all 3 mosaics follow the smae sort of pattern where black is appearing at the same spots in each image. I attributed this to how I was taking the photo, rotating on an access in a similar manner each time and doing the same sort of stitching leading to similar blackspace, but perhaps I could have improved my warping and stitching where this uniformity wouldn't have occured. One thing I enjoyed expirementing with was also auto stitching three mosaics together. I attached an example below. It was interesting seeing how to adapt an approach intended for two mosaics to a method with three mosaics.  </h2>
+</section>
+<section id="part-2.3" class="section">
+    <h2>Three Images</h2>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/sun_left.jpg" alt="FFT Derek">
+            <div>Left Sunset</div>
+        </div>
+        <div class="image-item">
+            <img src="media/sun_mid.jpg" alt="FFT Derek">
+            <div>Middle Sunset</div>
+        </div>
+        <div class="image-item">
+            <img src="media/sun_right.jpg" alt="FFT Derek">
+            <div>Right Sunset</div>
+        </div>
+        <div class="image-item">
+            <img src="media/three_img.png" alt="FFT Derek">
+            <div>Sunset Three Images</div>
+        </div>
+    </div>
+
+
 </section>
     </body>
 </html>
