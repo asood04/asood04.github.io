@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Project 4a: CS 180</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f9f9f9;
+            }
+            h1, h2, h3 {
+                color: #333;
+            }
+            p {
+                color: #555;
+                line-height: 1.6;
+            }
+            .section {
+                background-color: #fff;
+                border-radius: 15px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                margin-bottom: 30px;
+                padding: 20px;
+                transition: box-shadow 0.3s;
+            }
+            .section:hover {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            }
+            .image-gallery {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-bottom: 40px; /* Added space between galleries */
+            }
+            .image-item {
+                text-align: center;
+                flex-basis: calc(33.33% - 40px); /* Ensure 3 images per row */
+                max-width: 300px;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                overflow: hidden;
+                background-color: #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .image-item img {
+                max-width: 100%;
+                height: 200px; /* Uniform height */
+                object-fit: cover;
+            }
+            .image-item div {
+                padding: 10px;
+                font-size: 14px;
+                font-weight: bold;
+                color: #333;
+                background-color: #f0f0f0;
+            }
+            .middle-image-item {
+                flex-basis: calc(50% - 40px); /* Adjust width to take more space */
+                max-width: 400px; /* Set max width for middle image */
+            }
+            .description {
+                margin-top: 10px;
+                text-align: center;
+                color: #666;
+            }
+            h2 {
+                border-bottom: 2px solid #8fd921;
+                padding-bottom: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Project 5: Fun with Diffusion Models</h1>
+        
+        <!-- Section: Overview -->
+        <section id="overview" class="section">
+            <h2>Overview</h2>
+            <p>
+                For the first part of this project, I explored diffusion models to generate, restore, and transform images by iteratively denoising them from pure noise to realistic visuals. Using the DeepFloyd IF model, I implemented tasks like inpainting, hybrid imagery, and visual anagrams.
+            </p>
+        </section>
+        
+        <!-- Section: Part 1.1 -->
+        <section id="part-1.1" class="section">
+            <h2>Intial Sampling of Model</h2>
+            <p>
+                I sampled using 'a man wearing a hat' and played around with the number of interference step. I found that while smaller steps were much quicker the quality was much less realistic. While larger steps took longer, but looked much more realistic. 
+            </p>
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/1.1.png" alt="Original Image">
+                    <div>an oil painting of a snowy mountain</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/1.1.1.png" alt="Grad X">
+                    <div>a man wearing a hat</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/rckt.png" alt="Grad X">
+                    <div>a rocket ship</div>
+                </div>
+            </div>
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/10.png" alt="Original Image">
+                    <div>10 steps</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/1.1.1.png" alt="Grad X">
+                    <div>20 steps</div>
+                </div>
+                <div class="image-item">
+                    <img src="media/100.png" alt="Grad X">
+                    <div>100 steps</div>
+                </div>
+            </div>
+        
+        </section>
+        
+        <!-- Section: Part 1.2 -->
+<section id="part-1.2" class="section">
+    <h2>Sampling Loops</h2>
+    <p>In this task, I implemented the forward diffusion process to add controlled Gaussian noise to a clean image at specific timesteps, simulating how images degrade over time. Using this noisy data, I explored two denoising approaches: classical Gaussian blur filtering and a pretrained UNet model. The Gaussian blur provided a basic but limited ability to reduce noise, while the UNet, leveraging its pretrained knowledge, reconstructed the original image more effectively by estimating and removing the added noise. I visualized the results for each timestep to compare the original, noisy, and reconstructed images, highlighting the power of diffusion models in reversing noise for high-quality restoration.</p>
+    <h3>Timestep 250</h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/250noisy.png" alt="Animated GIF">
+            <div>Noisy</div>
+        </div>
+        <div class="image-item">
+            <img src="media/250guas.png" alt="Animated GIF">
+            <div>Guassian Denoised</div>
+        </div>
+        <div class="image-item">
+            <img src="media/250pred.png" alt="Animated GIF">
+            <div>Predicted Image</div>
+        </div>
+    </div>
+    <h3>Timestep 500</h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/500noisy.png" alt="Animated GIF">
+            <div>Noisy</div>
+        </div>
+        <div class="image-item">
+            <img src="media/500guass.png" alt="Animated GIF">
+            <div>Guassian Denoised</div>
+        </div>
+        <div class="image-item">
+            <img src="media/500pred.png" alt="Animated GIF">
+            <div>Predicted Image</div>
+        </div>
+    </div>
+    <h3>Timestep 750</h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/750noisy.png" alt="Animated GIF">
+            <div>Noisy</div>
+        </div>
+        <div class="image-item">
+            <img src="media/750guas.png" alt="Animated GIF">
+            <div>Guassian Denoised</div>
+        </div>
+        <div class="image-item">
+            <img src="media/750pred.png" alt="Animated GIF">
+            <div>Predicted Image</div>
+        </div>
+    </div>
+        
+</section>
+
+       <!-- Section: Part 2.1 -->
+<section id="part-3" class="section">
+    <h2>Iterative Denoising</h2>
+    <p>
+        This code implements an iterative denoising process to reconstruct a clean image from a noisy one using a diffusion model. Starting with a noisy image at a specified timestep, the iterative_denoise function progressively reduces noise step by step, leveraging the pretrained UNet model to estimate the clean image (x0_estimate) and compute the predicted image for the next (less noisy) timestep. The process follows equations from Denoising Diffusion Probabilistic Models (DDPM), iteratively refining the image until it approaches the original clean version. To enhance realism, variance is added at each step using the add_variance function. The function also visualizes the denoising progress at regular intervals, showcasing the gradual reduction of noise.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/690n.png" alt="Animated GIF">
+            <div>Noisy Campanile at t=690</div>
+        </div>
+        <div class="image-item">
+            <img src="media/510n.png" alt="Animated GIF">
+            <div>Noisy Campanile at t=510</div>
+        </div>
+        <div class="image-item">
+            <img src="media/330n.png" alt="Animated GIF">
+            <div>Noisy Campanile at t=330</div>
+        </div>
+        <div class="image-item">
+            <img src="media/150n.png" alt="Animated GIF">
+            <div>Noisy Campanile at t=150</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/original.png" alt="Animated GIF">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/Iterdenoised.png" alt="Animated GIF">
+            <div>Iteratively Denoised</div>
+        </div>
+        <div class="image-item">
+            <img src="media/one-step-den.png" alt="Animated GIF">
+            <div>One Step Denoised</div>
+        </div>
+        <div class="image-item">
+            <img src="media/guas-den.png" alt="Animated GIF">
+            <div>Guassian Denoised</div>
+        </div>
+</section>
+
+
+        <!-- Section: Part 2.2 -->
+<section id="part-2.2" class="section">
+    <h2>Diffusion Model Sampling</h2>
+    <p>
+        I started with random noise and used a diffusion model guided by the prompt "a high quality photo" to generate five unique images. By iteratively denoising each sample, I gradually transformed the noise into coherent, realistic visuals aligned with the given prompt.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/img1.png" alt="FFT Derek">
+            <div>Sample 1</div>
+        </div>
+        <div class="image-item">
+            <img src="media/img2.png" alt="FFT Derek">
+            <div>Sample 2</div>
+        </div>
+        <div class="image-item">
+            <img src="media/img3.png" alt="FFT Derek">
+            <div>Sample 3</div>
+        </div>
+        <div class="image-item">
+            <img src="media/img4.png" alt="FFT Derek">
+            <div>Sample 4</div>
+        </div>
+        <div class="image-item">
+            <img src="media/img5.png" alt="FFT Derek">
+            <div>Sample 5</div>
+        </div>
+    </div>
+</section>
+
+<section id="part-2.3" class="section">
+    <h2>Clasifier Free Guidance</h2>
+    <h3>
+        In this implementation, I used Classifier-Free Guidance (CFG) to generate images from random noise, leveraging both conditional and unconditional prompt embeddings. Unlike the earlier iterative_denoise function, which solely relies on the conditional prompt for denoising, CFG combines conditional and unconditional noise estimates to guide the model more strongly toward the desired prompt ("a high quality photo"). The guidance is achieved by amplifying the difference between the conditional and unconditional estimates using a scale factor, improving the alignment of the generated images to the text prompt. This approach enhances the quality and specificity of the generated images while maintaining diversity, resulting in more coherent and visually appealing outputs compared to standard iterative denoising.
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/gen1.png" alt="FFT Derek">
+            <div>Sample 1</div>
+        </div>
+        <div class="image-item">
+            <img src="media/gen2.png" alt="FFT Derek">
+            <div>Sample 2</div>
+        </div>
+        <div class="image-item">
+            <img src="media/gen3.png" alt="FFT Derek">
+            <div>Sample 3</div>
+        </div>
+        <div class="image-item">
+            <img src="media/gen4.png" alt="FFT Derek">
+            <div>Sample 4</div>
+        </div>
+        <div class="image-item">
+            <img src="media/gen5.png" alt="FFT Derek">
+            <div>Sample 5</div>
+        </div>
+    </div>
+    
+</section>
+<section id="part-2.3" class="section">
+    <h2>Image-to-image Translation</h2>
+    <p>
+        I apply noise to the input image at different levels, based on specified start indices, to create progressively noisier versions. For each noisy image, I use Classifier-Free Guidance (CFG) to iteratively denoise it, aligning the output with the prompt "a high quality photo." This process generates unique edits of the original image, depending on the amount of initial noise I introduce. I then compare these edits with the original image to observe how varying noise levels influence the final results.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/original.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/ind1.png" alt="FFT Derek">
+            <div>Index 1</div>
+        </div>
+        <div class="image-item">
+            <img src="media/ind3.png" alt="FFT Derek">
+            <div>Index 3</div>
+        </div>
+        <div class="image-item">
+            <img src="media/ind5.png" alt="FFT Derek">
+            <div>Index 5</div>
+        </div>
+        <div class="image-item">
+            <img src="media/ind7.png" alt="FFT Derek">
+            <div>Index 7</div>
+        </div>
+        <div class="image-item">
+            <img src="media/ind10.png" alt="FFT Derek">
+            <div>Index 10</div>
+        </div>
+        <div class="image-item">
+            <img src="media/ind20.png" alt="FFT Derek">
+            <div>Index 20</div>
+        </div>
+       
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/o1.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/o2.png" alt="FFT Derek">
+            <div>Index 1</div>
+        </div>
+        <div class="image-item">
+            <img src="media/o3.png" alt="FFT Derek">
+            <div>Index 3</div>
+        </div>
+        <div class="image-item">
+            <img src="media/o4.png" alt="FFT Derek">
+            <div>Index 5</div>
+        </div>
+        <div class="image-item">
+            <img src="media/o5.png" alt="FFT Derek">
+            <div>Index 7</div>
+        </div>
+        <div class="image-item">
+            <img src="media/o6.png" alt="FFT Derek">
+            <div>Index 10</div>
+        </div>
+        <div class="image-item">
+            <img src="media/o7.png" alt="FFT Derek">
+            <div>Index 20</div>
+        </div>
+       
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/p1.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/p2.png" alt="FFT Derek">
+            <div>Index 1</div>
+        </div>
+        <div class="image-item">
+            <img src="media/p3.png" alt="FFT Derek">
+            <div>Index 3</div>
+        </div>
+        <div class="image-item">
+            <img src="media/p4.png" alt="FFT Derek">
+            <div>Index 5</div>
+        </div>
+        <div class="image-item">
+            <img src="media/p5.png" alt="FFT Derek">
+            <div>Index 7</div>
+        </div>
+        <div class="image-item">
+            <img src="media/p6.png" alt="FFT Derek">
+            <div>Index 10</div>
+        </div>
+        <div class="image-item">
+            <img src="media/p7.png" alt="FFT Derek">
+            <div>Index 20</div>
+        </div>
+       
+    </div>
+</section>
+<section id="part-2.3" class="section">
+    <h2>Editing Hand-Drawn and Web Images</h2>
+    <p>
+        In this step I use previous CFG model to generate an image taken from the web and two hand drawn images. 
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/q1.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/q2.png" alt="FFT Derek">
+            <div>Index 1</div>
+        </div>
+        <div class="image-item">
+            <img src="media/q3.png" alt="FFT Derek">
+            <div>Index 3</div>
+        </div>
+        <div class="image-item">
+            <img src="media/q4.png" alt="FFT Derek">
+            <div>Index 5</div>
+        </div>
+        <div class="image-item">
+            <img src="media/q5.png" alt="FFT Derek">
+            <div>Index 7</div>
+        </div>
+        <div class="image-item">
+            <img src="media/q6.png" alt="FFT Derek">
+            <div>Index 10</div>
+        </div>
+        <div class="image-item">
+            <img src="media/q7.png" alt="FFT Derek">
+            <div>Index 20</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/w1.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/w2.png" alt="FFT Derek">
+            <div>Index 1</div>
+        </div>
+        <div class="image-item">
+            <img src="media/w3.png" alt="FFT Derek">
+            <div>Index 3</div>
+        </div>
+        <div class="image-item">
+            <img src="media/w4.png" alt="FFT Derek">
+            <div>Index 5</div>
+        </div>
+        <div class="image-item">
+            <img src="media/w5.png" alt="FFT Derek">
+            <div>Index 7</div>
+        </div>
+        <div class="image-item">
+            <img src="media/w6.png" alt="FFT Derek">
+            <div>Index 10</div>
+        </div>
+        <div class="image-item">
+            <img src="media/w7.png" alt="FFT Derek">
+            <div>Index 20</div>
+        </div>
+       
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/e1.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/e2.png" alt="FFT Derek">
+            <div>Index 1</div>
+        </div>
+        <div class="image-item">
+            <img src="media/e3.png" alt="FFT Derek">
+            <div>Index 3</div>
+        </div>
+        <div class="image-item">
+            <img src="media/e4.png" alt="FFT Derek">
+            <div>Index 5</div>
+        </div>
+        <div class="image-item">
+            <img src="media/e5.png" alt="FFT Derek">
+            <div>Index 7</div>
+        </div>
+        <div class="image-item">
+            <img src="media/e6.png" alt="FFT Derek">
+            <div>Index 10</div>
+        </div>
+        <div class="image-item">
+            <img src="media/e7.png" alt="FFT Derek">
+            <div>Index 20</div>
+        </div>
+       
+    </div>
+</section>
+<section id="part-2.3" class="section">
+    <h2>Inpainting</h2>
+    <h3>
+        Now, I implement an inpainting function that uses diffusion models to reconstruct parts of an image based on a binary mask. During each denoising step, I preserve the original content where the mask value is 0 and allow the model to generate new content where the mask value is 1, ensuring seamless blending. This approach effectively edits specific regions of an image while maintaining the original structure and detail in unedited areas.
+    </h3>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/a1.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/a2.png" alt="FFT Derek">
+            <div>Mask</div>
+        </div>
+        <div class="image-item">
+            <img src="media/a3.png" alt="FFT Derek">
+            <div>Replacement</div>
+        </div>
+        <div class="image-item">
+            <img src="media/a4.png" alt="FFT Derek">
+            <div>Inpainted</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/s1.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/s2.png" alt="FFT Derek">
+            <div>Mask</div>
+        </div>
+        <div class="image-item">
+            <img src="media/s3.png" alt="FFT Derek">
+            <div>Replacement</div>
+        </div>
+        <div class="image-item">
+            <img src="media/s4.png" alt="FFT Derek">
+            <div>Inpainted</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/download-10.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/d2.png" alt="FFT Derek">
+            <div>Mask</div>
+        </div>
+        <div class="image-item">
+            <img src="media/d3.png" alt="FFT Derek">
+            <div>Replacement</div>
+        </div>
+        <div class="image-item">
+            <img src="media/d4.png" alt="FFT Derek">
+            <div>Inpainted</div>
+        </div>
+    </div>
+</section>
+<section id="part-2.3" class="section">
+    <h2>Text-Conditioned Image-to-image Translation</h2>
+    <p>
+        I add noise to the original image at different levels and use CFG to iteratively denoise it, guided by the text prompt "a rocket ship." The process generates multiple variations of the image, where higher noise levels lead to more significant changes aligned with the rocket ship prompt. By displaying the original image alongside these variations, I demonstrate how the diffusion model transforms the image differently based on the initial noise level while adhering to the provided prompt.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/a1.png" alt="FFT Derek">
+            <div>Original</div>
+        </div>
+        <div class="image-item">
+            <img src="media/z1.png" alt="FFT Derek">
+            <div>Index 1</div>
+        </div>
+        <div class="image-item">
+            <img src="media/z3.png" alt="FFT Derek">
+            <div>Index 3</div>
+        </div>
+        <div class="image-item">
+            <img src="media/z4.png" alt="FFT Derek">
+            <div>Index 5</div>
+        </div>
+        <div class="image-item">
+            <img src="media/z5.png" alt="FFT Derek">
+            <div>Index 7</div>
+        </div>
+        <div class="image-item">
+            <img src="media/z6.png" alt="FFT Derek">
+            <div>Index 10</div>
+        </div>
+        <div class="image-item">
+            <img src="media/z7.png" alt="FFT Derek">
+            <div>Index 20</div>
+        </div>
+       
+    </div>
+
+
+</section>
+
+<section id="part-2.3" class="section">
+    <h2>Visual Anagrams</h2>
+    <p>
+        In this part, I am creating a visual anagram where it appears as one image from one orietation and another the otherway. At each timestep of the denoising process, I calculated noise estimates for both prompts—one for the normal orientation and one for the flipped image—and combined them with a weighted average, giving slightly more emphasis to the "old man" prompt for balance. I repeat the process for the others.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/oldman.png" alt="FFT Derek">
+            <div>Old Man</div>
+        </div>
+        <div class="image-item">
+            <img src="media/cmpfire.png" alt="FFT Derek">
+            <div>Campfire</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/dog.png" alt="FFT Derek">
+            <div>Dog</div>
+        </div>
+        <div class="image-item">
+            <img src="media/village.png" alt="FFT Derek">
+            <div>Oil Painting of Snowy Village</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/rocket.png" alt="FFT Derek">
+            <div>Rocket</div>
+        </div>
+        <div class="image-item">
+            <img src="media/oil_paint.png" alt="FFT Derek">
+            <div>Oil Painting of Man</div>
+        </div>
+    </div>
+</section>
+<section id="part-2.3" class="section">
+    <h2>Hybrid Images - A collection of Skulls</h2>
+    <p>
+
+        I implemented a function to create hybrid images by blending two distinct concepts—"a lithograph of a skull" and "a lithograph of waterfalls." At each timestep of the denoising process, I generated noise estimates for both prompts and applied a low-pass filter to the first prompt (skull) to emphasize its broader features, while applying a high-pass filter to the second prompt (waterfalls) to preserve its finer details. By combining these filtered frequencies, I constructed an image that visually shifts between the two concepts, depending on the viewing distance or focus. I tested different random seeds to fine tune.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/skull.png" alt="FFT Derek">
+            <div>Skull & Waterfall</div>
+        </div>
+    </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/download-1.png" alt="FFT Derek">
+            <div>Skull & Campfire</div>
+        </div>
+    </div>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/download-2.png" alt="FFT Derek">
+            <div>Skull & Snowy Oil Painting</div>
+        </div>
+    </div>
+</section>
+
+<h1>Part B</h1>
+<section id="part-2.3" class="section">
+    <p>
+        In this section of the project, we aim to train a U-Net model to denoise noisy MNIST digits. To prepare the training dataset, we first introduce noise to the MNIST images. Below are examples showcasing different noise levels:
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/fig3.png" alt="FFT Derek">
+        </div>
+    </div>
+    <p>
+        Using a sigma=0.5 level, I trained the UNet model so it can learn to denoise noisy digits into sharper images of the number.
+    </p>
+    <p>
+        This is an example result after 1 epoch. 
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/epoch1.png" alt="FFT Derek">
+        </div>
+    </div>
+    <p>This is an example result after 5 epochs. </p>
+        <div class="image-gallery">
+            <div class="image-item">
+                <img src="media/epoch5.png" alt="FFT Derek">
+            </div>
+        </div>
+    <p>While running the model I recorded the loss after every iteration and this is the resulting graph:  </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/fig4.png" alt="FFT Derek">
+        </div>
+    </div>
+    <p>
+        Finally, while running the model I recorded the results at various noise levels:
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/fig7.png" alt="FFT Derek">
+        </div>
+    </div>
+</section>
+<section id="part-2.3" class="section">
+    <h3>Part 2</h3>
+    <p>In this part, I modified my U-Net so it predicts the noise in an image instead of directly denoising it. This change is based on what I learned in Part A: iterative denoising works much better than trying to denoise everything in one step. I also added timestep conditioning to the U-Net, so the model knows exactly which step of the diffusion process it’s working on. This helps it adapt its predictions to the specific amount of noise present at each stage.
+
+    </p>
+    <p>To train the model, I took random batches of images, added noise to each image using a random timestep (from 0 to 299), and passed the noisy images through the U-Net. A timestep of 0 means no noise at all, while 299 means the image is pure noise. The model then predicted the noise that was added, and I calculated the loss by comparing the predicted noise to the actual noise that was applied. This way, the U-Net learns to understand how to work with all levels of noise in the diffusion process.</p>
+    <p>For sampling, I followed the iterative denoising process I used in Part A. I started with an image made entirely of noise and ran it through the U-Net multiple times, step by step, reducing the noise in stages. Since the model was trained on all kinds of noise levels, it could handle the denoising process effectively and recover a clean image by the end of the iterations.
+
+        Here are some of the results I got from my time-conditioned U-Net, showing how it transforms pure noise into recognizable images:</p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/5epoch.png" alt="FFT Derek">
+            <div>After Epoch 5</div>
+        </div>
+        <div class="image-item">
+            <img src="media/20epch.png" alt="FFT Derek">
+            <div>After Epoch 20</div>
+        </div>
+    </div>
+    <p>Here is my MSE Loss Graph:</p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/download-3.png" alt="FFT Derek">
+            <div>After Epoch 5</div>
+        </div>
+    </div>
+    
+   
+</section>
+
+
+
+    </body>
+</html>
