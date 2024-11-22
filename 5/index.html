@@ -72,6 +72,17 @@
                 border-bottom: 2px solid #8fd921;
                 padding-bottom: 5px;
             }
+            .image-item img#e11, .image-item img#e55 {
+                height: auto; /* Allow height to adjust automatically */
+                width: 100%; /* Ensure image scales to fit the width */
+            }
+
+            .image-item.e11,
+            .image-item.e55 {
+                max-width: 600px; /* Increase the maximum width for these specific items */
+                flex-basis: calc(100% - 40px); /* Ensure it spans a full row */
+            }
+            
         </style>
     </head>
     <body>
@@ -688,21 +699,44 @@
     <p>For sampling, I followed the iterative denoising process I used in Part A. I started with an image made entirely of noise and ran it through the U-Net multiple times, step by step, reducing the noise in stages. Since the model was trained on all kinds of noise levels, it could handle the denoising process effectively and recover a clean image by the end of the iterations.
 
         Here are some of the results I got from my time-conditioned U-Net, showing how it transforms pure noise into recognizable images:</p>
-    <div class="image-gallery">
-        <div class="image-item">
-            <img src="media/5epoch.png" alt="FFT Derek">
-            <div>After Epoch 5</div>
+        <div class="image-gallery">
+            <div class="image-item e11">
+                <img id="e11" src="media/e11.png" alt="FFT Derek">
+                <div>After Epoch 5</div>
+            </div>
+            <div class="image-item e55">
+                <img id="e55" src="media/e55.png" alt="FFT Derek">
+                <div>After Epoch 20</div>
+            </div>
         </div>
-        <div class="image-item">
-            <img src="media/20epch.png" alt="FFT Derek">
-            <div>After Epoch 20</div>
-        </div>
-    </div>
     <p>Here is my MSE Loss Graph:</p>
     <div class="image-gallery">
         <div class="image-item">
-            <img src="media/download-3.png" alt="FFT Derek">
-            <div>After Epoch 5</div>
+            <img src="media/timeconditionloss.png" alt="FFT Derek">
+            <div>Loss Graph</div>
+        </div>
+    </div>
+
+    <p>Now, I will enhance the UNet by incorporating class conditioning. This modification allows the model to utilize class-specific information during training, enabling it to denoise images more effectively. By training the UNet on specific digit images along with their corresponding labels, the model learns to better reconstruct and generate images of numbers. This also gives me the ability to generate images of specific digits by conditioning the UNet on the desired class.
+
+        This approach is similar to providing a text prompt to a generative model and obtaining an image aligned with the prompt. In this case, instead of text prompts, I use class labels (e.g., digits 0–9) to guide the image generation process.
+        
+        Below, I present the results demonstrating the improvement achieved by adding class conditioning to the UNet.</p>
+        <div class="image-gallery">
+            <div class="image-item e11">
+                <img id="e11" src="media/e555.png" alt="FFT Derek">
+                <div>After Epoch 5</div>
+            </div>
+            <div class="image-item e55">
+                <img id="e55" src="media/e222.png" alt="FFT Derek">
+                <div>After Epoch 20</div>
+            </div>
+        </div>
+    <p>Here is my MSE Loss Graph:</p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/download-9.png" alt="FFT Derek">
+            <div>Loss Graph</div>
         </div>
     </div>
     
