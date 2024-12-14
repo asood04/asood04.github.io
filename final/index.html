@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Project 2: CS 180</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f9f9f9;
+            }
+            h1, h2, h3 {
+                color: #333;
+            }
+            p {
+                color: #555;
+                line-height: 1.6;
+            }
+            .section {
+                background-color: #fff;
+                border-radius: 15px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                margin-bottom: 30px;
+                padding: 20px;
+                transition: box-shadow 0.3s;
+            }
+            .section:hover {
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            }
+            .image-gallery {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-bottom: 40px; /* Added space between galleries */
+            }
+            .image-item {
+                text-align: center;
+                flex-basis: calc(33.33% - 40px); /* Ensure 3 images per row */
+                max-width: 300px;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                overflow: hidden;
+                background-color: #fff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .image-item img {
+                max-width: 100%;
+                height: 200px; /* Uniform height */
+                object-fit: cover;
+            }
+            .image-item div {
+                padding: 10px;
+                font-size: 14px;
+                font-weight: bold;
+                color: #333;
+                background-color: #f0f0f0;
+            }
+            .description {
+                margin-top: 10px;
+                text-align: center;
+                color: #666;
+            }
+            h2 {
+                border-bottom: 2px solid #8fd921;
+                padding-bottom: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Final Project 1: Augmented Reality</h1>
+        
+        <!-- Section: Overview -->
+        <section id="overview" class="section">
+            <h2>Overview</h2>
+            <p>
+                In this project, I implemented an augmented reality system where I captured a video and inserted a synthetic 3D cube into the scene. To achieve this, I started by calibrating the camera for each video frame using 2D image points whose 3D coordinates I measured and labeled. By computing a camera projection matrix, I was able to project the cube's 3D coordinates onto the video frames, making the cube appear seamlessly integrated into the scene.
+            </p>
+        </section>
+        
+        <!-- Section: Part 1.1 -->
+        <section id="part-1.1" class="section">
+            <h2>Part 1: Creating the Object Field</h2>
+            <p>
+                To start off, I created a grid and placed it on a rectangular object. I then recorded this box from different angles as seen below. I then labeled these angles. I then selected 24 points to use as reference and labeled them with every box being 1 unit away from the next. Since this was a 3d field I used x, y, and x coords as shown below. 
+            </p>
+            <div class="image-gallery">
+                <div class="image-item">
+                    <img src="media/calibrating_camera.png" alt="Original Image">
+                    <div>My Keypoints</div>
+                </div>
+            </div>
+            <video controls>
+                <source src="media/ar_orig.mov" type="video/quicktime">
+                Your browser does not support the video tag.
+            </video>
+        </section>
+        
+        <!-- Section: Part 1.2 -->
+<section id="part-1.2" class="section">
+    <h2>Part 2: Tracker</h2>
+    <p>
+        In this section, I focused on tracking the selected points across all frames of the video. I used the cv2.TrackerMedianFlow_create tracker, initializing it with bounding boxes around the points in the first frame. For each subsequent frame, the tracker updated the positions of these points to ensure they stayed aligned with the corresponding features in the video. I also filtered out any poorly tracked or out-of-bound points to maintain accuracy. By the end, I had a reliable set of 2D coordinates for each point in every frame, which I could use for further processing.
+    </p>
+    <p>
+        To calibrate the camera, I computed a projection matrix that mapped the 3D world coordinates of the tracked points to their corresponding 2D image coordinates in each frame. I used the lstsq function to solve for this matrix using the 3D points I had manually defined and the 2D points tracked across the frames. This projection matrix allowed me to determine the camera's position and orientation relative to the scene in each frame, which was essential for accurately projecting the synthetic cube into the video.
+    </p>
+    <video controls>
+        <source src="media/tracked_pts_vid.mp4" type="video/quicktime">
+        Your browser does not support the video tag.
+    </video>
+</section>
+    
+
+        <!-- Section: Part 2.2 -->
+<section id="part-2.2" class="section">
+    <h2>Part 3: Projecting the Cube</h2>
+    <p>
+        The final step was to project the cube into the video. I started by defining the cube's 3D vertices and then transformed them into 2D image coordinates using the projection matrix from the calibration step. With these 2D points, I used OpenCV's drawing functions to render the cube, connecting the edges to create its structure. As I processed each frame, the cube was consistently rendered in the correct position and orientation, making it appear as if it were part of the real-world scene. I then saved the final frames with the projected cube into the output directory.
+    </p>
+    
+    
+    <video controls>
+        <source src="media/ar_final_vid.mp4" type="video/quicktime">
+        Your browser does not support the video tag.
+    </video>
+
+    
+</section>
+<h1>Final Project 2: Lightfields</h1>
+        
+<!-- Section: Overview -->
+<section id="overview" class="section">
+    <h2>Overview</h2>
+    <p>
+        In this project, I explored the fascinating concept of lightfields by working with datasets from the Stanford Light Field Archive. Lightfields capture all the light rays passing through a plane, allowing for advanced photographic effects. Using a grid of images, I implemented two key techniques: depth refocusing and aperture adjustments. 
+    </p>
+
+</section>
+
+<!-- Section: Part 1.1 -->
+<section id="part-1.1" class="section">
+    <h2>Part 1: Depth Refocusing</h2>
+    <p>
+        In the depth refocusing part of this project, I simulated changing focus in a scene by shifting and averaging images from a lightfield grid. By calculating shifts based on the desired focus depth and the grid positions, I brought objects at specific depths into focus while blurring others. I then created a depth sweep by generating frames at varying depths and combined them into an animated GIF to showcase the dynamic focusing effect. Below I showcased two examples, that I thought represented two different objects to demonstrate depth refocusing.
+    </p>
+    <div class="image-gallery">
+        <div class="image-item">
+            <img src="media/chess_focus.gif" alt="Animated GIF">
+            <div>Chess Board</div>
+        </div>
+        <div class="image-item">
+            <img src="media/legofocus.gif" alt="Animated GIF">
+            <div>Lego</div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Section: Part 1.2 -->
+<section id="part-1.2" class="section">
+<h2>Part 2: Aperture Adjustments</h2>
+<p>
+    In the depth refocusing part of this project, I simulated changing focus in a scene by shifting and averaging images from a lightfield grid. By calculating shifts based on the desired focus depth and the grid positions, I brought objects at specific depths into focus while blurring others. I then created a depth sweep by generating frames at varying depths and combined them into an animated GIF to showcase the dynamic focusing effect.
+</p>
+<div class="image-gallery">
+    <div class="image-item">
+        <img src="media/legoap.gif" alt="Animated GIF">
+        <div>Lego</div>
+    </div>
+
+</div>
+</section>
+
+
+<!-- Section: Part 2.2 -->
+<section id="part-2.2" class="section">
+<h2>Bells and Whistles: New Dataset</h2>
+<p>
+For the bells and whistles I attempted to create my own dataset of a lego car. To do this I created a 2x5 grid. The results were suboptimal. This I am attributing to artifacts that appear in the backgournd inconsistencies from column to column angles and overall lack of data. 
+</p>
+
+
+</section>
+
+
+
+
+
+
+    </body>
+</html>
