@@ -83,7 +83,7 @@
         <section id="part-1.1" class="section">
             <h2>Part 1: Creating the Object Field</h2>
             <p>
-                To start off, I created a grid and placed it on a rectangular object. I then recorded this box from different angles as seen below. I then labeled these angles. I then selected 24 points to use as reference and labeled them with every box being 1 unit away from the next. Since this was a 3d field I used x, y, and x coords as shown below. 
+                To start off, I created a grid and placed it on a rectangular object. I then recorded this box from different angles as seen below. I then labeled these angles. I then selected 24 points to use as reference and labeled them with every box being 1 unit away from the next. Since this was a 3d field I used x, y, and z coords as shown below. 
             </p>
             <div class="image-gallery">
                 <div class="image-item">
@@ -91,10 +91,13 @@
                     <div>My Keypoints</div>
                 </div>
             </div>
-            <video controls>
-                <source src="media/ar_orig.mov" type="video/quicktime">
+            
+            <video controls width="640" height="360">
+                <source src="https://drive.google.com/file/d/1m6_HIdmQxhsA171Gp6etBVkrYdzmRsM6/view?usp=sharing" type="video/quicktime">
                 Your browser does not support the video tag.
             </video>
+            <iframe src="https://drive.google.com/file/d/1m6_HIdmQxhsA171Gp6etBVkrYdzmRsM6/view?usp=sharing" width="640" height="360" allow="autoplay"></iframe>
+            
         </section>
         
         <!-- Section: Part 1.2 -->
@@ -106,10 +109,11 @@
     <p>
         To calibrate the camera, I computed a projection matrix that mapped the 3D world coordinates of the tracked points to their corresponding 2D image coordinates in each frame. I used the lstsq function to solve for this matrix using the 3D points I had manually defined and the 2D points tracked across the frames. This projection matrix allowed me to determine the camera's position and orientation relative to the scene in each frame, which was essential for accurately projecting the synthetic cube into the video.
     </p>
-    <video controls>
-        <source src="media/tracked_pts_vid.mp4" type="video/quicktime">
+    <video controls width="640" height="360">
+        <source src="https://drive.google.com/file/d/1K9GXcVgaeNJCGjbEx6URb-h3tug65IM-/view?usp=sharing" type="video/mp4">
         Your browser does not support the video tag.
     </video>
+    <iframe src="https://drive.google.com/file/d/1K9GXcVgaeNJCGjbEx6URb-h3tug65IM-/view?usp=sharing" width="640" height="360" allow="autoplay"></iframe>
 </section>
     
 
@@ -121,10 +125,11 @@
     </p>
     
     
-    <video controls>
-        <source src="media/ar_final_vid.mp4" type="video/quicktime">
+    <video controls width="640" height="360">
+        <source src="https://drive.google.com/file/d/1HMIHoeM8mal-tPe74-urnSvfGQbJST7X/view?usp=sharing" type="video/mp4">
         Your browser does not support the video tag.
     </video>
+    <iframe src="https://drive.google.com/file/d/1HMIHoeM8mal-tPe74-urnSvfGQbJST7X/view?usp=sharing" width="640" height="360" allow="autoplay"></iframe>
 
     
 </section>
@@ -162,7 +167,7 @@
 <section id="part-1.2" class="section">
 <h2>Part 2: Aperture Adjustments</h2>
 <p>
-    In the depth refocusing part of this project, I simulated changing focus in a scene by shifting and averaging images from a lightfield grid. By calculating shifts based on the desired focus depth and the grid positions, I brought objects at specific depths into focus while blurring others. I then created a depth sweep by generating frames at varying depths and combined them into an animated GIF to showcase the dynamic focusing effect.
+    To create a visualization of how varying the aperture size affects focus and depth of field I iterated over different aperture sizes and saving the results, it demonstrates the trade-offs between sharpness and background blur in light field imaging. The key here is a smaller aperture leads to more focus whereas a larger aperture introduces a background blur.
 </p>
 <div class="image-gallery">
     <div class="image-item">
@@ -172,14 +177,67 @@
 
 </div>
 </section>
+<section id="part-1.2" class="section">
+    <h2>Part 3: What I Learned?</h2>
+    <p>
+
+        I learned that certain light field operations, like depth refocusing, can be achieved using straightforward algorithms, such as shifting and averaging images. This simplicity highlights the elegance of computational photography techniques in manipulating light field data.
+    
+        However, I also came to understand the challenges posed by the sheer volume of data involved in light fields. These datasets are incredibly large, and if operations are not implemented efficiently, they can become computationally expensive and slow.
+    </p>
+    </section>
 
 
 <!-- Section: Part 2.2 -->
 <section id="part-2.2" class="section">
 <h2>Bells and Whistles: New Dataset</h2>
-<p>
-For the bells and whistles I attempted to create my own dataset of a lego car. To do this I created a 2x5 grid. The results were suboptimal. This I am attributing to artifacts that appear in the backgournd inconsistencies from column to column angles and overall lack of data. 
-</p>
+<p>These are two rows of a dataset I created.</p>
+<div class="image-gallery">
+    <div class="image-item">
+        <img src="media/0_0.png" alt="FFT Derek">
+    </div>
+    <div class="image-item">
+        <img src="media/0_1.png" alt="FFT Derek">
+    </div>
+    <div class="image-item">
+        <img src="media/0_2.png" alt="FFT Derek">
+    </div>
+    <div class="image-item">
+        <img src="media/0_3.png" alt="FFT Derek">
+    </div>
+    <div class="image-item">
+        <img src="media/0_4.png" alt="FFT Derek">
+    </div>
+</div>
+<div class="image-gallery">
+    <div class="image-item">
+        <img src="media/1_0.png" alt="FFT Derek">
+    </div>
+    <div class="image-item">
+        <img src="media/1_1.png" alt="FFT Derek">
+    </div>
+    <div class="image-item">
+        <img src="media/1_2.png" alt="FFT Derek">
+    </div>
+    <div class="image-item">
+        <img src="media/1_3.png" alt="FFT Derek">
+    </div>
+    <div class="image-item">
+        <img src="media/1_4.png" alt="FFT Derek">
+    </div>
+</div>
+<div class="image-gallery">
+    <div class="image-item">
+        <img src="media/car_focus.gif" alt="FFT Derek">
+        <div>Depth</div>
+    </div>
+    <div class="image-item">
+        <img src="media/car_aperture.gif" alt="FFT Derek">
+        <div>Aperture</div>
+    </div>
+</div>
+<p>Potential reasons for suboptimal results: The subpar results from using a custom dataset can likely be attributed to several factors based on the manner with which I sampled. First and foremost, insufficient sample size. Specifically from an angular standpoint, I only captured 5 angles repeatedly, which to recreate a light field simply isn't enough. As you can see with my image, clearly averaging did not turn out well and the too few angular samples largely contributes to that. Additionally, not having a consistent set up likely also aided to bad results. Misalignment due to not having a stable rig and rather using my hand likely led to unfocused bad results. Without proper calibration for all camera parameters both intrinsic and extrinsic, also contributed to bad quality. Also, the Stanford dataset used profesional cameras in a profesional studio. I did not have such luxuries which degraded the dataset I used. Without proper sampling and equipment the effective aperture range was essentially limited and the depth refocusing on could not be done. More likely than not, these all compounded on one another to give me the subpar results I obtained. </p>
+
 
 
 </section>
