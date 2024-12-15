@@ -83,7 +83,7 @@
         <section id="part-1.1" class="section">
             <h2>Part 1: Creating the Object Field</h2>
             <p>
-                To start off, I created a grid and placed it on a rectangular object. I then recorded this box from different angles as seen below. I then labeled these angles. I then selected 24 points to use as reference and labeled them with every box being 1 unit away from the next. Since this was a 3d field I used x, y, and z coords as shown below. 
+                To start off, I created a grid and placed it on a rectangular object. I then recorded this box from different angles as seen below. I then labeled these angles. I then selected 24 points to use as reference and labeled them with every box being 1 unit away from the next. Since this was a 3d field I used x, y, and z coords as shown below. Please click on 'Open the document directly' to access the video. For some reason the normal ways of sharing the video or not working, but everyone has access to the video on the drive. 
             </p>
             <div class="image-gallery">
                 <div class="image-item">
@@ -104,10 +104,10 @@
 <section id="part-1.2" class="section">
     <h2>Part 2: Tracker</h2>
     <p>
-        In this section, I focused on tracking the selected points across all frames of the video. I used the cv2.TrackerMedianFlow_create tracker, initializing it with bounding boxes around the points in the first frame. For each subsequent frame, the tracker updated the positions of these points to ensure they stayed aligned with the corresponding features in the video. I also filtered out any poorly tracked or out-of-bound points to maintain accuracy. By the end, I had a reliable set of 2D coordinates for each point in every frame, which I could use for further processing.
+        Next, I focused on tracking the selected points across all frames of the video. I used the cv2.TrackerMedianFlow_create tracker, initializing it with bounding boxes around the points in the first frame. For each subsequent frame, the tracker updated the positions of these points to ensure they stayed aligned with the corresponding features in the video. I also filtered out any poorly tracked or out-of-bound points to maintain accuracy. By the end, I had a reliable set of 2D coordinates for each point in every frame, which I could use for further processing.
     </p>
     <p>
-        To calibrate the camera, I computed a projection matrix that mapped the 3D world coordinates of the tracked points to their corresponding 2D image coordinates in each frame. I used the lstsq function to solve for this matrix using the 3D points I had manually defined and the 2D points tracked across the frames. This projection matrix allowed me to determine the camera's position and orientation relative to the scene in each frame, which was essential for accurately projecting the synthetic cube into the video.
+        To calibrate the camera, I computed a projection matrix that mapped the 3D world coordinates of the tracked points to their corresponding 2D image coordinates in each frame. I used the lstsq function to solve for this matrix using the 3D points I had manually defined and the 2D points tracked across the frames. This projection matrix allowed me to determine the camera's position and orientation relative to the scene in each frame, which was essential for accurately projecting the synthetic cube into the video. Please click on 'Open the document directly' to access the video. For some reason the normal ways of sharing the video or not working, but everyone has access to the video on the drive. 
     </p>
     <video controls width="640" height="360">
         <source src="https://drive.google.com/file/d/1K9GXcVgaeNJCGjbEx6URb-h3tug65IM-/view?usp=sharing" type="video/mp4">
@@ -121,7 +121,7 @@
 <section id="part-2.2" class="section">
     <h2>Part 3: Projecting the Cube</h2>
     <p>
-        The final step was to project the cube into the video. I started by defining the cube's 3D vertices and then transformed them into 2D image coordinates using the projection matrix from the calibration step. With these 2D points, I used OpenCV's drawing functions to render the cube, connecting the edges to create its structure. As I processed each frame, the cube was consistently rendered in the correct position and orientation, making it appear as if it were part of the real-world scene. I then saved the final frames with the projected cube into the output directory.
+        The final step was to project the cube into the video. I started by defining the cube's 3D vertices and then transformed them into 2D image coordinates using the projection matrix from the calibration step. With these 2D points, I used OpenCV's drawing functions to render the cube, connecting the edges to create its structure. As I processed each frame, the cube was consistently rendered in the correct position and orientation, making it appear as if it were part of the real-world scene. I then saved the final frames with the projected cube into the output directory. Please click on 'Open the document directly' to access the video. For some reason the normal ways of sharing the video or not working, but everyone has access to the video on the drive. 
     </p>
     
     
@@ -191,7 +191,7 @@
 <!-- Section: Part 2.2 -->
 <section id="part-2.2" class="section">
 <h2>Bells and Whistles: New Dataset</h2>
-<p>These are two rows of a dataset I created.</p>
+<p>These are two rows of a dataset I created. The dataset I created was 50 images large, or 10 rows by 5 cols. Below is a 2x5 sample of the images I used. All images were captured via iPhone. </p>
 <div class="image-gallery">
     <div class="image-item">
         <img src="media/0_0.png" alt="FFT Derek">
