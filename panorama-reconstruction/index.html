@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panorama Reconstruction with Homographies, Feature Matching, and RANSAC | Aadit Sood</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="../">Aadit Sood</a>
+  <nav aria-label="Primary navigation">
+    <a href="../">Home</a>
+    <a href="../urban-tree-stress/">Remote Sensing</a>
+    <a href="../light-fields/">Computational Imaging</a>
+    <a href="../augmented-reality/">Camera Geometry</a>
+    <a href="../mnist-diffusion-unet/">Diffusion Models</a>
+    <a href="../diffusion-imaging/">Generative AI</a>
+    <a aria-current="page" href="../panorama-reconstruction/">Robust Estimation</a>
+    <a href="../face-morphing/">Geometric Vision</a>
+    <a href="../frequency-blending/">Frequency Analysis</a>
+    <a href="../computational-photography/">Computational Imaging</a>
+  </nav>
+</header>
+<main>
+  <section class="project-hero">
+    <div>
+      <p class="eyebrow">Robust Estimation</p>
+      <h1>Panorama Reconstruction with Homographies, Feature Matching, and RANSAC</h1>
+      <p class="lede">A panorama pipeline that starts with manually selected correspondences, then extends to Harris corners, ANMS, patch descriptors, feature matching, RANSAC, and automatic stitching.</p>
+    </div>
+    <img src="media/vlsb_fin.png" alt="Panorama Reconstruction with Homographies, Feature Matching, and RANSAC preview">
+  </section>
+  <div class="writeup-layout">
+    <aside class="toc" aria-label="Page sections">
+      <a href="#abstract">Abstract</a>
+      <a href="#homographies-and-rectification">Homographies and Rectification</a>
+      <a href="#manual-mosaics">Manual Mosaics</a>
+      <a href="#feature-detection-and-anms">Feature Detection and ANMS</a>
+      <a href="#descriptors-matching-and-ransac">Descriptors, Matching, and RANSAC</a>
+      <a href="#autostitched-results-and-three-view-experiment">Autostitched Results and Three-View Experiment</a>
+      <a href="#additional-implementation-notes">Additional Implementation Notes</a>
+      <a href="#technical-takeaways-and-future-work">Technical Takeaways and Future Work</a>
+    </aside>
+    <article>
+<section class="writeup-section" id="abstract">
+  <h2>Abstract</h2>
+  <p>This work reconstructs mosaics by estimating projective transformations between overlapping images. The first half uses manually selected correspondences to compute homographies for rectification and panorama stitching. The second half automates correspondence discovery with feature detection, descriptor matching, and RANSAC.</p>
+  <p>The important technical thread is robust geometry: a panorama is only as good as the point correspondences used to estimate the warp, and a feature matcher is only useful if outliers are rejected before computing the final homography.</p>
+</section>
+<section class="writeup-section" id="homographies-and-rectification">
+  <h2>Homographies and Rectification</h2>
+  <p>A homography is a <span class="inline-math">3times3</span> projective transform that maps points between two views of a plane. Using homogeneous coordinates:</p>
+  <div class="math-block"><span class="matrix"><span>x'</span><span>y'</span><span>1</span></span>∼ H<span class="matrix"><span>x</span><span>y</span><span>1</span></span>,<span class="math-gap"></span> H=<span class="matrix"><span>h<sub>11</sub> h<sub>12</sub> h<sub>13</sub></span><span>h<sub>21</sub> h<sub>22</sub> h<sub>23</sub></span><span>h<sub>31</sub> h<sub>32</sub> 1</span></span></div>
+  <p>Each correspondence contributes two linear equations after clearing the homogeneous denominator:</p>
+  <div class="math-block">x'=<span class="fraction"><span>h<sub>11</sub>x+h<sub>12</sub>y+h<sub>13</sub></span><span>h<sub>31</sub>x+h<sub>32</sub>y+1</span></span>,<span class="math-gap"></span> y'=<span class="fraction"><span>h<sub>21</sub>x+h<sub>22</sub>y+h<sub>23</sub></span><span>h<sub>31</sub>x+h<sub>32</sub>y+1</span></span></div>
+  <div class="math-block"><span class="matrix"><span>x y 1 0 0 0 −x'x −x'y</span><span>0 0 0 x y 1 −y'x −y'y</span></span>h=<span class="matrix"><span>x'</span><span>y'</span></span></div>
+  <p>Stacking equations from multiple correspondences gives an overdetermined system solved by least squares. For rectification, I select four corners of a planar object and map them to a rectangle, producing a front-facing view.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/rectangular_painting.jpg" alt="Angled painting" loading="lazy">
+    <figcaption>Angled painting</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/rectified_painting.png" alt="Rectified painting" loading="lazy">
+    <figcaption>Rectified painting</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/cereal.jpg" alt="Angled cereal box" loading="lazy">
+    <figcaption>Angled cereal box</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/rectified_cereal.png" alt="Rectified cereal box" loading="lazy">
+    <figcaption>Rectified cereal box</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/book.jpg" alt="Angled book" loading="lazy">
+    <figcaption>Angled book</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/rectified_book.png" alt="Rectified book" loading="lazy">
+    <figcaption>Rectified book</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="manual-mosaics">
+  <h2>Manual Mosaics</h2>
+  <p>For the manually stitched mosaics, I selected overlapping points in each image pair, computed a homography, inverse-warped one image into the other image's coordinate system, estimated an output canvas from the warped corner positions, and blended the images on that canvas.</p>
+  <p>The result depends on both geometric accuracy and blending. Even with a good homography, the output can show black regions or visible transitions if the camera rotation and canvas bounds produce uncovered areas.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/kitchen_left.jpg" alt="Kitchen left" loading="lazy">
+    <figcaption>Kitchen left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/kitchen_mosaic.png" alt="Kitchen mosaic" loading="lazy">
+    <figcaption>Kitchen mosaic</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/kitchen_right.jpg" alt="Kitchen right" loading="lazy">
+    <figcaption>Kitchen right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/street_left.jpg" alt="Street left" loading="lazy">
+    <figcaption>Street left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/street_mosaic.png" alt="Street mosaic" loading="lazy">
+    <figcaption>Street mosaic</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/street_right.jpg" alt="Street right" loading="lazy">
+    <figcaption>Street right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/room_left.jpg" alt="Room left" loading="lazy">
+    <figcaption>Room left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/room_mosaic.png" alt="Room mosaic" loading="lazy">
+    <figcaption>Room mosaic</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/room_right.jpg" alt="Room right" loading="lazy">
+    <figcaption>Room right</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="feature-detection-and-anms">
+  <h2>Feature Detection and ANMS</h2>
+  <p>The automatic pipeline begins with Harris corner detection, which identifies points where image intensity changes strongly in multiple directions. The Harris response is based on the second-moment matrix <span class="inline-math">M</span>:</p>
+  <div class="math-block">R=det(M)−ktrace(M)<sup>2</sup></div>
+  <p>Raw Harris points cluster around textured regions, so I applied Adaptive Non-Maximal Suppression. ANMS keeps strong corners that are spatially spread out by assigning each point a suppression radius: the distance to the nearest point with significantly stronger response.</p>
+  <div class="math-block">r<sub>i</sub>=min<sub>j</sub> ‖x<sub>i</sub>−x<sub>j</sub>‖<span class="math-gap"></span> such that<span class="math-gap"></span> f(x<sub>j</sub>) gt;c f(x<sub>i</sub>)</div>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/VLSB_hl.png" alt="Harris corners, VLSB left" loading="lazy">
+    <figcaption>Harris corners, VLSB left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/VLSB_hr.png" alt="Harris corners, VLSB right" loading="lazy">
+    <figcaption>Harris corners, VLSB right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/anms_left.png" alt="ANMS, VLSB left" loading="lazy">
+    <figcaption>ANMS, VLSB left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/anms_right.png" alt="ANMS, VLSB right" loading="lazy">
+    <figcaption>ANMS, VLSB right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/apt_anms_l.png" alt="ANMS, skyline left" loading="lazy">
+    <figcaption>ANMS, skyline left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/apt_anms_r.png" alt="ANMS, skyline right" loading="lazy">
+    <figcaption>ANMS, skyline right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/tree_anms_l.png" alt="ANMS, street left" loading="lazy">
+    <figcaption>ANMS, street left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/tree_anms_r.png" alt="ANMS, street right" loading="lazy">
+    <figcaption>ANMS, street right</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="descriptors-matching-and-ransac">
+  <h2>Descriptors, Matching, and RANSAC</h2>
+  <p>For each selected corner, I extracted a descriptor by sampling an <span class="inline-math">8times8</span> patch from a larger blurred <span class="inline-math">40times40</span> region. The descriptor is normalized to reduce sensitivity to brightness and contrast. Matching uses descriptor distance, with a nearest-neighbor ratio test to reduce ambiguous matches.</p>
+  <div class="math-block"><span class="fraction"><span>‖d<sub>i</sub>−d<sub>1</sub>‖<sub>2</sub></span><span>‖d<sub>i</sub>−d<sub>2</sub>‖<sub>2</sub></span></span> lt;τ</div>
+  <p>Even after ratio testing, outliers remain. RANSAC repeatedly samples minimal correspondence sets, estimates a candidate homography, projects all points, and counts inliers under a reprojection threshold. The final homography is refit from the inliers.</p>
+  <div class="math-block">ε<sub>i</sub>=‖x<sub>i</sub>'−π(Hx<sub>i</sub>)‖<sub>2</sub></div>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/vlsb_patch.png" alt="Patch descriptors, VLSB left" loading="lazy">
+    <figcaption>Patch descriptors, VLSB left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/vlsb_patch_r.png" alt="Patch descriptors, VLSB right" loading="lazy">
+    <figcaption>Patch descriptors, VLSB right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/apt_fea_l.png" alt="Feature matches, skyline left" loading="lazy">
+    <figcaption>Feature matches, skyline left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/apt_fea_r.png" alt="Feature matches, skyline right" loading="lazy">
+    <figcaption>Feature matches, skyline right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/vlsb_ransac_l.png" alt="RANSAC inliers, VLSB left" loading="lazy">
+    <figcaption>RANSAC inliers, VLSB left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/vlsb_ransac_r.png" alt="RANSAC inliers, VLSB right" loading="lazy">
+    <figcaption>RANSAC inliers, VLSB right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/apt_ran_l.png" alt="RANSAC inliers, skyline left" loading="lazy">
+    <figcaption>RANSAC inliers, skyline left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/apt_ran_r.png" alt="RANSAC inliers, skyline right" loading="lazy">
+    <figcaption>RANSAC inliers, skyline right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/tree_ran_l.png" alt="RANSAC inliers, street left" loading="lazy">
+    <figcaption>RANSAC inliers, street left</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="autostitched-results-and-three-view-experiment">
+  <h2>Autostitched Results and Three-View Experiment</h2>
+  <p>Using the RANSAC-filtered correspondences, I computed final automatic mosaics. The VLSB and skyline outputs are the strongest. The street and sunset experiments show that feature matches can be plausible while blending or warping still leaves visible artifacts.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/vlsb_fin.png" alt="Autostitched VLSB panorama" loading="lazy">
+    <figcaption>Autostitched VLSB panorama</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/apt_fin.png" alt="Autostitched skyline panorama" loading="lazy">
+    <figcaption>Autostitched skyline panorama</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/tree_fin.png" alt="Autostitched street panorama" loading="lazy">
+    <figcaption>Autostitched street panorama</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/sun_left.jpg" alt="Sunset left" loading="lazy">
+    <figcaption>Sunset left</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/sun_mid.jpg" alt="Sunset middle" loading="lazy">
+    <figcaption>Sunset middle</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/sun_right.jpg" alt="Sunset right" loading="lazy">
+    <figcaption>Sunset right</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/three_img.png" alt="Three-view sunset panorama" loading="lazy">
+    <figcaption>Three-view sunset panorama</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="additional-implementation-notes">
+  <h2>Additional Implementation Notes</h2>
+  <p>For rectification and mosaicing, I used inverse warping because it avoids holes in the output image. The output canvas is first defined in the target coordinate system. For each output pixel, the inverse homography maps the coordinate back into the source image, where the pixel value can be sampled. This is more stable than pushing source pixels forward because a forward warp can skip target pixels when the mapping expands or shears the image.</p>
+  <p>Canvas construction is a practical but important part of the mosaic pipeline. After applying the homography to the corners of the image being warped, I used the transformed corners to estimate the bounds of the output panorama. Because some transformed coordinates can be negative, the implementation needs a translation offset so all content lands inside the positive pixel grid. Many visual artifacts in mosaics come not from the homography itself, but from this bookkeeping around bounds, offsets, and overlapping regions.</p>
+  <p>The automatic feature pipeline follows the Brown, Szeliski, and Winder style of local patch matching. Harris detection supplies many candidate corners, ANMS selects a spatially distributed subset, and normalized patch descriptors make matching less sensitive to local brightness changes. The descriptor is deliberately low dimensional: the goal is not to describe every texture detail, but to create enough distinctiveness that corresponding corners are close in descriptor space.</p>
+  <p>The ratio test is useful because absolute descriptor distance alone can be misleading. A point in a repetitive texture may have several plausible matches, all with similar distances. The ratio between the nearest and second-nearest neighbor measures ambiguity. If the nearest match is only slightly better than the second-nearest, the correspondence is unreliable and should be rejected before RANSAC.</p>
+  <p>RANSAC then turns a noisy correspondence set into a robust geometric estimate. Each iteration samples a small set of matches, computes a homography, and asks how many other matches agree with that model. Outliers may be numerous, but they are unlikely to agree on the same projective transform. Once a large inlier set is found, refitting the homography on all inliers improves stability relative to using only the minimal sample.</p>
+  <p>The automatic panoramas reveal that feature matching and image blending are separate problems. RANSAC can produce a sensible set of inliers and still leave visible seams, exposure differences, or black regions if the projection surface and blending strategy are too simple. That is why a production panorama system usually adds cylindrical or spherical projection, gain compensation, seam finding, and multi-band blending after the geometric alignment stage.</p>
+  <p>The three-view sunset experiment also forced a more global way of thinking about stitching. With two images, there is a single homography and one overlap region. With three images, the middle view becomes a natural reference frame, and both outer images must be warped into that shared coordinate system. Any small error in either side becomes visible when the panorama is assembled, so multi-image stitching benefits from reasoning about a graph of pairwise relationships rather than treating every pair independently.</p>
+</section>
+<section class="writeup-section" id="technical-takeaways-and-future-work">
+  <h2>Technical Takeaways and Future Work</h2>
+  <p>RANSAC was the central robustness tool: it allowed a good homography to be estimated from a noisy set of matches. The hardest part remained warping and blending; several mosaics shared similar black-space artifacts, suggesting that canvas placement and projection choice could be improved.</p>
+  <p>Future work would add cylindrical warping for wide panoramas, multi-band blending, exposure compensation, and a cleaner three-image stitching graph rather than stitching pairs in a fixed order.</p>
+</section>
+    </article>
+  </div>
+</main>
+<footer>Technical portfolio by Aadit Sood.</footer>
+</body>
+</html>

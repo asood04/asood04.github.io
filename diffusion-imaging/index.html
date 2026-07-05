@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diffusion-Based Image Generation, Editing, and Restoration | Aadit Sood</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="../">Aadit Sood</a>
+  <nav aria-label="Primary navigation">
+    <a href="../">Home</a>
+    <a href="../urban-tree-stress/">Remote Sensing</a>
+    <a href="../light-fields/">Computational Imaging</a>
+    <a href="../augmented-reality/">Camera Geometry</a>
+    <a href="../mnist-diffusion-unet/">Diffusion Models</a>
+    <a aria-current="page" href="../diffusion-imaging/">Generative AI</a>
+    <a href="../panorama-reconstruction/">Robust Estimation</a>
+    <a href="../face-morphing/">Geometric Vision</a>
+    <a href="../frequency-blending/">Frequency Analysis</a>
+    <a href="../computational-photography/">Computational Imaging</a>
+  </nav>
+</header>
+<main>
+  <section class="project-hero">
+    <div>
+      <p class="eyebrow">Generative AI</p>
+      <h1>Diffusion-Based Image Generation, Editing, and Restoration</h1>
+      <p class="lede">A DeepFloyd IF exploration of sampling, forward noising, iterative denoising, classifier-free guidance, image-to-image translation, inpainting, visual anagrams, and frequency-composed prompt hybrids.</p>
+    </div>
+    <img src="media/skull.png" alt="Diffusion-Based Image Generation, Editing, and Restoration preview">
+  </section>
+  <div class="writeup-layout">
+    <aside class="toc" aria-label="Page sections">
+      <a href="#abstract">Abstract</a>
+      <a href="#forward-process-and-sampling-quality">Forward Process and Sampling Quality</a>
+      <a href="#one-step-and-iterative-denoising">One-Step and Iterative Denoising</a>
+      <a href="#classifier-free-guidance">Classifier-Free Guidance</a>
+      <a href="#image-to-image-translation-and-inpainting">Image-to-Image Translation and Inpainting</a>
+      <a href="#text-guided-edits-visual-anagrams-and-hybrid-prompts">Text-Guided Edits, Visual Anagrams, and Hybrid Prompts</a>
+      <a href="#additional-implementation-notes">Additional Implementation Notes</a>
+      <a href="#technical-takeaways-and-future-work">Technical Takeaways and Future Work</a>
+    </aside>
+    <article>
+<section class="writeup-section" id="abstract">
+  <h2>Abstract</h2>
+  <p>This writeup explores diffusion models as iterative image priors. Starting from either random noise or a noised version of an input image, the model repeatedly predicts and removes noise to generate or restore an image. I used this mechanism for text-to-image sampling, image restoration, guided editing, masked inpainting, visual anagrams, and hybrid images.</p>
+  <p>The experiments make the denoising process explicit: changing timestep, guidance scale, initial noise level, and prompt combination changes how much structure is preserved and how strongly the output follows a text condition.</p>
+</section>
+<section class="writeup-section" id="forward-process-and-sampling-quality">
+  <h2>Forward Process and Sampling Quality</h2>
+  <p>A diffusion model is trained around a forward noising process that gradually corrupts an image. At timestep <span class="inline-math">t</span>, the clean image <span class="inline-math">x<sub>0</sub></span> is mixed with Gaussian noise <span class="inline-math">ε</span>:</p>
+  <div class="math-block">x<sub>t</sub>=<span class="sqrt">√<span>ᾱ<sub>t</sub></span></span>x<sub>0</sub>+<span class="sqrt">√<span>1−ᾱ<sub>t</sub></span></span>ε,<span class="math-gap"></span> ε∼𝒩(0,I)</div>
+  <p>Sampling reverses this process. I first tested text prompts such as an oil painting of a snowy mountain, a man wearing a hat, and a rocket ship. Increasing the number of inference steps improved realism, but also increased runtime.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/1.1.png" alt="Oil painting of a snowy mountain" loading="lazy">
+    <figcaption>Oil painting of a snowy mountain</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/1.1.1.png" alt="A man wearing a hat" loading="lazy">
+    <figcaption>A man wearing a hat</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/rckt.png" alt="A rocket ship" loading="lazy">
+    <figcaption>A rocket ship</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/10.png" alt="10 denoising steps" loading="lazy">
+    <figcaption>10 denoising steps</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/100.png" alt="100 denoising steps" loading="lazy">
+    <figcaption>100 denoising steps</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="one-step-and-iterative-denoising">
+  <h2>One-Step and Iterative Denoising</h2>
+  <p>I compared classical Gaussian denoising against model-based denoising at several timesteps. Gaussian blur reduces high-frequency noise but cannot distinguish noise from real detail. The pretrained UNet predicts noise using learned image structure, so it reconstructs more plausible detail.</p>
+  <p>The reverse step estimates <span class="inline-math">x<sub>0</sub></span> from the current noisy image and predicted noise:</p>
+  <div class="math-block">x̂<sub>0</sub>=<span class="fraction"><span>x<sub>t</sub>−<span class="sqrt">√<span>1−ᾱ<sub>t</sub></span></span>ε<sub>θ</sub>(x<sub>t</sub>,t)</span><span><span class="sqrt">√<span>ᾱ<sub>t</sub></span></span></span></span></div>
+  <p>Iterative denoising applies this idea over a schedule of timesteps, adding the appropriate variance at each step. This outperformed one-step denoising and Gaussian blur because the model could refine the image gradually.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/250noisy.png" alt="Noisy image at t=250" loading="lazy">
+    <figcaption>Noisy image at t=250</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/250guas.png" alt="Gaussian denoised at t=250" loading="lazy">
+    <figcaption>Gaussian denoised at t=250</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/250pred.png" alt="Model prediction at t=250" loading="lazy">
+    <figcaption>Model prediction at t=250</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/500noisy.png" alt="Noisy image at t=500" loading="lazy">
+    <figcaption>Noisy image at t=500</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/500pred.png" alt="Model prediction at t=500" loading="lazy">
+    <figcaption>Model prediction at t=500</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/750noisy.png" alt="Noisy image at t=750" loading="lazy">
+    <figcaption>Noisy image at t=750</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/750pred.png" alt="Model prediction at t=750" loading="lazy">
+    <figcaption>Model prediction at t=750</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/Iterdenoised.png" alt="Iterative denoising" loading="lazy">
+    <figcaption>Iterative denoising</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/one-step-den.png" alt="One-step denoising" loading="lazy">
+    <figcaption>One-step denoising</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/guas-den.png" alt="Gaussian denoising" loading="lazy">
+    <figcaption>Gaussian denoising</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="classifier-free-guidance">
+  <h2>Classifier-Free Guidance</h2>
+  <p>Classifier-free guidance combines an unconditional noise estimate with a conditional one. The guidance scale <span class="inline-math">s</span> amplifies the direction that makes the output better match the prompt:</p>
+  <div class="math-block">ε<sub>cfg</sub>=ε<sub>uncond</sub>+s(ε<sub>cond</sub>−ε<sub>uncond</sub>)</div>
+  <p>Compared with unguided sampling, CFG produced sharper and more prompt-aligned images for the high quality photo prompt, while still allowing diversity across samples.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/img1.png" alt="Unguided sample 1" loading="lazy">
+    <figcaption>Unguided sample 1</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/img2.png" alt="Unguided sample 2" loading="lazy">
+    <figcaption>Unguided sample 2</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/img3.png" alt="Unguided sample 3" loading="lazy">
+    <figcaption>Unguided sample 3</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/gen1.png" alt="CFG sample 1" loading="lazy">
+    <figcaption>CFG sample 1</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/gen2.png" alt="CFG sample 2" loading="lazy">
+    <figcaption>CFG sample 2</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/gen3.png" alt="CFG sample 3" loading="lazy">
+    <figcaption>CFG sample 3</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/gen4.png" alt="CFG sample 4" loading="lazy">
+    <figcaption>CFG sample 4</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/gen5.png" alt="CFG sample 5" loading="lazy">
+    <figcaption>CFG sample 5</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="image-to-image-translation-and-inpainting">
+  <h2>Image-to-Image Translation and Inpainting</h2>
+  <p>For image-to-image translation, I added noise to an input image at different starting indices and then denoised with a prompt. Low starting noise preserves the input; higher starting noise gives the model more freedom to reinterpret the image.</p>
+  <p>For inpainting, I used a binary mask. At every denoising step, the unmasked pixels are forced to remain consistent with the original image while the masked region is regenerated:</p>
+  <div class="math-block">x<sub>t</sub> arrow m⊙ x<sub>t</sub><sup>generated</sup>+(1−m)⊙ x<sub>t</sub><sup>original</sup></div>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/original.png" alt="Original image" loading="lazy">
+    <figcaption>Original image</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/ind1.png" alt="Image-to-image index 1" loading="lazy">
+    <figcaption>Image-to-image index 1</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/ind7.png" alt="Image-to-image index 7" loading="lazy">
+    <figcaption>Image-to-image index 7</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/ind20.png" alt="Image-to-image index 20" loading="lazy">
+    <figcaption>Image-to-image index 20</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/q1.png" alt="Hand/web input" loading="lazy">
+    <figcaption>Hand/web input</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/q7.png" alt="Edited output" loading="lazy">
+    <figcaption>Edited output</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/a1.png" alt="Original for inpainting" loading="lazy">
+    <figcaption>Original for inpainting</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/a2.png" alt="Mask" loading="lazy">
+    <figcaption>Mask</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/a3.png" alt="Replacement guide" loading="lazy">
+    <figcaption>Replacement guide</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/a4.png" alt="Inpainted result" loading="lazy">
+    <figcaption>Inpainted result</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/s4.png" alt="Second inpainted result" loading="lazy">
+    <figcaption>Second inpainted result</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/d4.png" alt="Third inpainted result" loading="lazy">
+    <figcaption>Third inpainted result</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="text-guided-edits-visual-anagrams-and-hybrid-prompts">
+  <h2>Text-Guided Edits, Visual Anagrams, and Hybrid Prompts</h2>
+  <p>Text-guided image-to-image translation uses the same noising and denoising loop, but changes the prompt to push the reconstruction toward a target concept such as a rocket ship. The degree of transformation is controlled by the starting noise level.</p>
+  <p>Visual anagrams use two prompt objectives under different orientations. At each denoising step, I estimate noise for the normal image and for a flipped version, then combine the estimates so the image reads differently when rotated or flipped.</p>
+  <p>The hybrid prompt experiment borrows the frequency idea from earlier image processing work: one prompt is used for low-frequency structure and another for high-frequency detail.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/z1.png" alt="Rocket edit, low noise" loading="lazy">
+    <figcaption>Rocket edit, low noise</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/z7.png" alt="Rocket edit, high noise" loading="lazy">
+    <figcaption>Rocket edit, high noise</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/oldman.png" alt="Anagram view: old man" loading="lazy">
+    <figcaption>Anagram view: old man</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/cmpfire.png" alt="Anagram view: campfire" loading="lazy">
+    <figcaption>Anagram view: campfire</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/dog.png" alt="Anagram view: dog" loading="lazy">
+    <figcaption>Anagram view: dog</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/village.png" alt="Anagram view: snowy village" loading="lazy">
+    <figcaption>Anagram view: snowy village</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/rocket.png" alt="Anagram view: rocket" loading="lazy">
+    <figcaption>Anagram view: rocket</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/oil_paint.png" alt="Anagram view: oil painting" loading="lazy">
+    <figcaption>Anagram view: oil painting</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/skull.png" alt="Skull/waterfall hybrid" loading="lazy">
+    <figcaption>Skull/waterfall hybrid</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/download-1.png" alt="Skull/campfire hybrid" loading="lazy">
+    <figcaption>Skull/campfire hybrid</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/download-2.png" alt="Skull/snowy painting hybrid" loading="lazy">
+    <figcaption>Skull/snowy painting hybrid</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="additional-implementation-notes">
+  <h2>Additional Implementation Notes</h2>
+  <p>The forward noising equation gives a useful interpretation of timestep. At small <span class="inline-math">t</span>, <span class="inline-math">ᾱ<sub>t</sub></span> is large, so the noised image still contains most of the original structure. At large <span class="inline-math">t</span>, the noise term dominates and the image contains little recognizable information. This explains the image-to-image results: starting from a low noise index preserves the input, while starting from a high noise index lets the model replace more of the image with prompt-consistent content.</p>
+  <p>The comparison between Gaussian denoising and UNet denoising illustrates the difference between a hand-designed prior and a learned prior. Gaussian blur assumes noise is high frequency and signal is low frequency. That is sometimes true, but real image details such as edges, text, and texture are also high frequency. The diffusion model has learned a stronger prior over natural images, so its denoising step can preserve plausible structure while suppressing noise.</p>
+  <p>Classifier-free guidance is a tradeoff rather than a free improvement. Increasing the guidance scale pushes samples toward the prompt, but too much guidance can reduce diversity or introduce artifacts. In these experiments, CFG made the high quality photo samples more coherent because the conditional estimate was amplified relative to the unconditional estimate. The same idea later appears in text-guided editing, where the prompt controls the denoising trajectory.</p>
+  <p>Inpainting requires careful handling of the mask at every timestep, not just at the end. If the model is allowed to denoise the entire image freely, unmasked regions can drift away from the original. By reintroducing the appropriately noised original outside the mask during the loop, the algorithm constrains the edit region while still allowing the masked area to be generated consistently with surrounding context.</p>
+  <p>Visual anagrams are interesting because the model is asked to satisfy two interpretations simultaneously. A normal image and a transformed version of the image are both evaluated against different prompts. Combining their predicted noise directions creates a denoising update that tries to make both views plausible. This is fragile and seed-dependent, but it shows that diffusion sampling can be treated as an optimization process over multiple visual constraints.</p>
+  <p>The hybrid prompt images connect this generative work back to the earlier frequency-blending study. Instead of combining two existing images, the denoising update combines prompt-conditioned noise estimates after filtering them into low- and high-frequency components. The result is a generated image whose coarse structure can read as one concept while fine details suggest another, echoing the classical hybrid-image construction but inside the diffusion loop.</p>
+</section>
+<section class="writeup-section" id="technical-takeaways-and-future-work">
+  <h2>Technical Takeaways and Future Work</h2>
+  <p>The strongest pattern across the experiments is that diffusion editing is controlled by how much noise is introduced and how strongly the prompt is enforced. Small noise gives conservative edits, large noise enables semantic transformation, and CFG increases prompt adherence.</p>
+  <p>Future work would add systematic sweeps over seeds, guidance scale, noise schedule, and mask softness, then compare outputs with both qualitative results and reconstruction metrics.</p>
+</section>
+    </article>
+  </div>
+</main>
+<footer>Technical portfolio by Aadit Sood.</footer>
+</body>
+</html>

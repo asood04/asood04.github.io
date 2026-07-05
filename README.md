@@ -1,2 +1,3 @@
 # asood04.github.io
-CS180 Projects
+
+Personal technical portfolio for visual computing explorations.

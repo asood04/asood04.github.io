@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geometric Face Morphing and Population-Average Modeling | Aadit Sood</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="../">Aadit Sood</a>
+  <nav aria-label="Primary navigation">
+    <a href="../">Home</a>
+    <a href="../urban-tree-stress/">Remote Sensing</a>
+    <a href="../light-fields/">Computational Imaging</a>
+    <a href="../augmented-reality/">Camera Geometry</a>
+    <a href="../mnist-diffusion-unet/">Diffusion Models</a>
+    <a href="../diffusion-imaging/">Generative AI</a>
+    <a href="../panorama-reconstruction/">Robust Estimation</a>
+    <a aria-current="page" href="../face-morphing/">Geometric Vision</a>
+    <a href="../frequency-blending/">Frequency Analysis</a>
+    <a href="../computational-photography/">Computational Imaging</a>
+  </nav>
+</header>
+<main>
+  <section class="project-hero">
+    <div>
+      <p class="eyebrow">Geometric Vision</p>
+      <h1>Geometric Face Morphing and Population-Average Modeling</h1>
+      <p class="lede">A geometry-first face morphing pipeline using correspondences, Delaunay triangulation, affine triangle warps, cross-dissolves, population averages, and extrapolated caricatures.</p>
+    </div>
+    <video autoplay loop muted playsinline class="project-media" aria-label="Geometric Face Morphing and Population-Average Modeling preview">
+      <source src="media/morph_sequence.mp4" type="video/mp4">
+    </video>
+  </section>
+  <div class="writeup-layout">
+    <aside class="toc" aria-label="Page sections">
+      <a href="#abstract">Abstract</a>
+      <a href="#correspondences-and-triangulation">Correspondences and Triangulation</a>
+      <a href="#affine-triangle-warping">Affine Triangle Warping</a>
+      <a href="#population-average-face">Population-Average Face</a>
+      <a href="#caricature-and-attribute-morphing">Caricature and Attribute Morphing</a>
+      <a href="#additional-implementation-notes">Additional Implementation Notes</a>
+      <a href="#technical-takeaways-and-future-work">Technical Takeaways and Future Work</a>
+    </aside>
+    <article>
+<section class="writeup-section" id="abstract">
+  <h2>Abstract</h2>
+  <p>A face morph is not just a fade between two images. If the eyes, nose, mouth, and chin are not geometrically aligned, a cross-dissolve produces ghosting. This work combines shape interpolation with appearance interpolation so that both geometry and color move smoothly between faces.</p>
+  <p>The same machinery is then applied to a population face dataset. By averaging landmarks and appearances, I estimate a mean face, warp examples into that mean geometry, and extrapolate away from the mean to produce caricatures.</p>
+</section>
+<section class="writeup-section" id="correspondences-and-triangulation">
+  <h2>Correspondences and Triangulation</h2>
+  <p>The morph begins with corresponding landmark points on two faces. Let <span class="inline-math">P=\p<sub>i</sub>\</span> be landmarks on image A and <span class="inline-math">Q=\q<sub>i</sub>\</span> be landmarks on image B. For an interpolation parameter <span class="inline-math">t</span>, the intermediate shape is:</p>
+  <div class="math-block">S<sub>t</sub>=(1−t)P+tQ</div>
+  <p>I compute Delaunay triangulation on the average landmark shape, then reuse that triangle connectivity for both faces. Triangulating the average shape avoids favoring one face's geometry over the other and reduces skinny triangles.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/Part1Points.png" alt="Landmarks on my face" loading="lazy">
+    <figcaption>Landmarks on my face</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/Part1PointsSteph.png" alt="Landmarks on comparison face" loading="lazy">
+    <figcaption>Landmarks on comparison face</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/mewithtriangulation.png" alt="Triangulation on my face" loading="lazy">
+    <figcaption>Triangulation on my face</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/currywithtrig.png" alt="Triangulation on comparison face" loading="lazy">
+    <figcaption>Triangulation on comparison face</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/avgtriangleshape.png" alt="Average triangulation" loading="lazy">
+    <figcaption>Average triangulation</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="affine-triangle-warping">
+  <h2>Affine Triangle Warping</h2>
+  <p>Each triangle in the intermediate shape defines a local affine warp from the source triangle. If a source triangle has coordinates <span class="inline-math">x</span> and the target triangle has coordinates <span class="inline-math">x'</span>, the affine transform satisfies:</p>
+  <div class="math-block"><span class="matrix"><span>x'</span><span>y'</span><span>1</span></span>=A<span class="matrix"><span>x</span><span>y</span><span>1</span></span></div>
+  <p>For every triangle, I compute the inverse affine transform from the target triangle back into the source image, sample pixels inside the triangular mask, and use interpolation to fill the warped image. Both source faces are warped into <span class="inline-math">S<sub>t</sub></span>, then their colors are blended:</p>
+  <div class="math-block">I<sub>t</sub>=(1−t)warp(I<sub>A</sub>,S<sub>t</sub>)+twarp(I<sub>B</sub>,S<sub>t</sub>)</div>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/aaditproj3 (1).jpg" alt="Source face A" loading="lazy">
+    <figcaption>Source face A</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/midwayface.png" alt="Midway face" loading="lazy">
+    <figcaption>Midway face</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/curryproj32 (1).jpg" alt="Source face B" loading="lazy">
+    <figcaption>Source face B</figcaption>
+  </figure>
+  <figure class="media-card">
+    <video autoplay loop muted playsinline class="project-media" aria-label="45-frame morph sequence">
+      <source src="media/morph_sequence.mp4" type="video/mp4">
+    </video>
+    <figcaption>45-frame morph sequence</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="population-average-face">
+  <h2>Population-Average Face</h2>
+  <p>For the population model, I used the FEI face database with provided landmarks on neutral faces. I added corner points so the image boundary would warp more stably, averaged all landmark coordinates, and warped every face into that mean geometry. Averaging the warped appearances produced the population-average face.</p>
+  <div class="math-block">p̄<sub>i</sub>=<span class="fraction"><span>1</span><span>N</span></span>∑<sub>k=1</sub><sup>N</sup>p<sub>i</sub><sup>(k)</sup>,<span class="math-gap"></span> Ī=<span class="fraction"><span>1</span><span>N</span></span>∑<sub>k=1</sub><sup>N</sup>warp(I<sup>(k)</sup>,P̄)</div>
+  <p>The examples below show individual faces warped into the mean geometry. Because the dataset landmarks do not describe ears well, ear regions are less stable in some personal-to-average warps.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/avgface.png" alt="Population-average face" loading="lazy">
+    <figcaption>Population-average face</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/orig1a.png" alt="Original sample 1" loading="lazy">
+    <figcaption>Original sample 1</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/morph1a.png" alt="Sample 1 warped to average" loading="lazy">
+    <figcaption>Sample 1 warped to average</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/orig10a.png" alt="Original sample 10" loading="lazy">
+    <figcaption>Original sample 10</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/morph10a.png" alt="Sample 10 warped to average" loading="lazy">
+    <figcaption>Sample 10 warped to average</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/12aorig.png" alt="Original sample 12" loading="lazy">
+    <figcaption>Original sample 12</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/12amorph.png" alt="Sample 12 warped to average" loading="lazy">
+    <figcaption>Sample 12 warped to average</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/myfacetoavgface.png" alt="My face warped to average" loading="lazy">
+    <figcaption>My face warped to average</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/avgfacetomyface.png" alt="Average face warped to my geometry" loading="lazy">
+    <figcaption>Average face warped to my geometry</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="caricature-and-attribute-morphing">
+  <h2>Caricature and Attribute Morphing</h2>
+  <p>Caricatures extrapolate beyond the mean rather than interpolating toward it. If <span class="inline-math">p</span> is my face geometry and <span class="inline-math">p̄</span> is the population mean, an extrapolated geometry can be written as:</p>
+  <div class="math-block">p<sub>α</sub>=p+α(p−p̄)</div>
+  <p>Negative and positive values change the geometry in different directions, making the face narrower, wider, or otherwise exaggerated depending on the landmark displacement. I also explored a shape-and-appearance morph to a reference average face, separating geometry morphing from appearance cross-dissolve before combining them.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="media/origface.png" alt="Original face" loading="lazy">
+    <figcaption>Original face</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/carciture-0.9.png" alt="Caricature alpha -0.9" loading="lazy">
+    <figcaption>Caricature alpha -0.9</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/carciture-0.5.png" alt="Caricature alpha -0.5" loading="lazy">
+    <figcaption>Caricature alpha -0.5</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/carciture1.1.png" alt="Caricature alpha 1.1" loading="lazy">
+    <figcaption>Caricature alpha 1.1</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/chineseaveragewoman.webp" alt="Reference average face" loading="lazy">
+    <figcaption>Reference average face</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/metoasian.png" alt="Shape morph" loading="lazy">
+    <figcaption>Shape morph</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/crossdisolve.png" alt="Appearance morph" loading="lazy">
+    <figcaption>Appearance morph</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="media/fullmorph.png" alt="Combined morph" loading="lazy">
+    <figcaption>Combined morph</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="additional-implementation-notes">
+  <h2>Additional Implementation Notes</h2>
+  <p>The triangle-wise warp is implemented with inverse mapping rather than forward splatting. Forward mapping sends each source pixel into the target image, but it can leave holes because not every target pixel is guaranteed to receive a value. Inverse mapping iterates over every target pixel inside a triangle, maps that pixel back into the corresponding source triangle, and samples the source image. This produces a dense target image and makes interpolation easier to control.</p>
+  <p>The affine transform for each triangle is computed from three point correspondences. If the source triangle vertices are placed into a matrix and the destination triangle vertices are placed into another matrix, the local transform can be solved exactly because an affine map has six degrees of freedom and three 2D correspondences provide six scalar equations. Repeating that process for every triangle produces a piecewise-affine approximation to a smooth facial deformation.</p>
+  <p>The morph sequence uses two parameters that can be tied together or varied separately: warp fraction and dissolve fraction. The warp fraction controls the geometry of the intermediate face, while the dissolve fraction controls how much color comes from each source. Setting them equal creates a natural transition, but separating them is useful for analysis because it reveals whether a visual change is caused by shape or appearance.</p>
+  <p>The population-average experiment is sensitive to dataset structure. The FEI landmarks provide consistent facial correspondences, which makes averaging meaningful, but they also constrain what can be represented. Regions without landmarks are governed by nearby triangles and therefore may smear or stretch. Adding image-corner points helped stabilize the boundary, but a denser landmark set around ears, hairline, and shoulders would better preserve those regions.</p>
+  <p>The caricature experiment is best understood geometrically. The vector from the average face to my face describes how my landmark configuration differs from the population mean. Moving farther along that vector exaggerates those differences, while moving in the opposite direction suppresses them. Because the transformation is applied to landmark geometry before image sampling, the exaggeration changes shape without needing a separate drawing or stylization model.</p>
+</section>
+<section class="writeup-section" id="technical-takeaways-and-future-work">
+  <h2>Technical Takeaways and Future Work</h2>
+  <p>The main lesson is that morphing quality is dominated by correspondences. Smooth interpolation and good blending cannot compensate for missing landmarks around important geometry. Adding boundary points also matters because triangle warps otherwise behave poorly near image edges.</p>
+  <p>Future work would use automatic landmark detection, denser landmarks around hair and ears, and a more careful interpolation strategy for video-quality morph sequences.</p>
+</section>
+    </article>
+  </div>
+</main>
+<footer>Technical portfolio by Aadit Sood.</footer>
+</body>
+</html>

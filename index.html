@@ -1,60 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Portfolio</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        h1 {
-            font-size: 2.5em;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        nav {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-        }
-        a {
-            text-decoration: none;
-            color: #fff;
-            background-color: #007bff;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-        }
-        a:hover {
-            background-color: #0056b3;
-        }
-        footer {
-            margin-top: 30px;
-            font-size: 0.9em;
-            color: #666;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aadit Sood | Technical Portfolio</title>
+  <link rel="stylesheet" href="styles.css?v=portfolio-positioning">
 </head>
 <body>
-    <h1>Welcome to My CS180 Portfolio!</h1>
-    <nav>
-        <a href="./1/index.html">Project 1</a>
-        <a href="./2/index.html">Project 2</a>
-        <a href="./3/index.html">Project 3</a>
-        <a href="./4a/index.html">Project 4</a>
-        <a href="./5/index.html">Project 5</a>
-        <a href="./final/index.html">Final Projects</a>
-    </nav>
+<header class="site-header">
+  <a class="brand" href="./">Aadit Sood</a>
+  <nav aria-label="Primary navigation">
+    <a href="./">Home</a>
+    <a href="#work">Work</a>
+  </nav>
+</header>
+<main>
+  <section class="home-hero">
+    <p class="eyebrow">Computer Vision · Perception · Generative AI · Remote Sensing</p>
+    <h1>Applied research in computer vision, perception, and generative AI.</h1>
+    <p class="lede">A portfolio of research-driven systems and implementation studies across computational imaging, geometric vision, diffusion models, remote sensing, and camera-based perception. These projects emphasize building models and pipelines from first principles, analyzing failure modes, and adapting modern vision methods to real visual data.</p>
+  </section>
+  <section id="work" class="project-grid" aria-label="Technical writeups">
+<a class="project-card" href="urban-tree-stress/">
+  <img src="urban-tree-stress/media/groundingdino-separated-boxes.png" alt="UAV-Based Tree Crown Detection for Urban Tree Stress Analysis preview" loading="lazy">
+  <span>Remote Sensing</span>
+  <h2>UAV-Based Tree Crown Detection for Urban Tree Stress Analysis</h2>
+  <p>Developed a multimodal vision pipeline for detecting and segmenting individual tree crowns from UAV imagery, combining RGB, vegetation, and height-derived signals with GroundingDINO, Segment Anything, and bounding-box refinement.</p>
+</a>
+<a class="project-card" href="light-fields/">
+  <video autoplay loop muted playsinline class="project-media" aria-label="Light Field Refocusing and Synthetic Aperture Rendering preview">
+    <source src="light-fields/media/chess_focus.mp4" type="video/mp4">
+  </video>
+  <span>Computational Imaging</span>
+  <h2>Light Field Refocusing and Synthetic Aperture Rendering</h2>
+  <p>Implemented light-field rendering techniques for computational refocusing and synthetic aperture control using structured camera arrays and handheld capture experiments.</p>
+</a>
+<a class="project-card" href="augmented-reality/">
+  <img src="augmented-reality/media/calibrating_camera.png" alt="Marker-Based Augmented Reality with Camera Calibration preview" loading="lazy">
+  <span>Augmented Reality</span>
+  <h2>Marker-Based Augmented Reality with Camera Calibration</h2>
+  <p>Built a camera-calibrated AR pipeline that tracks 2D keypoints, estimates projection matrices, and renders 3D geometry into real video frames.</p>
+</a>
+<a class="project-card" href="mnist-diffusion-unet/">
+  <img src="mnist-diffusion-unet/media/e555.png" alt="Denoising U-Net Training for Digit Diffusion preview" loading="lazy">
+  <span>Diffusion Models</span>
+  <h2>Denoising U-Net Training for Digit Diffusion</h2>
+  <p>Trained a compact U-Net diffusion model for noisy image restoration, timestep-conditioned denoising, and label-conditioned digit generation.</p>
+</a>
+<a class="project-card" href="diffusion-imaging/">
+  <img src="diffusion-imaging/media/skull.png" alt="Diffusion-Based Image Generation, Editing, and Restoration preview" loading="lazy">
+  <span>Generative AI</span>
+  <h2>Diffusion-Based Image Generation, Editing, and Restoration</h2>
+  <p>Explored diffusion-based generation and editing with iterative denoising, classifier-free guidance, image-to-image translation, inpainting, and prompt-conditioned visual transformations.</p>
+</a>
+<a class="project-card" href="panorama-reconstruction/">
+  <img src="panorama-reconstruction/media/vlsb_fin.png" alt="Panorama Reconstruction with Homographies, Feature Matching, and RANSAC preview" loading="lazy">
+  <span>Robust Estimation</span>
+  <h2>Panorama Reconstruction with Homographies, Feature Matching, and RANSAC</h2>
+  <p>Built a panorama reconstruction pipeline combining homography estimation, feature detection, adaptive non-maximal suppression, descriptor matching, RANSAC, and image warping.</p>
+</a>
+<a class="project-card" href="face-morphing/">
+  <video autoplay loop muted playsinline class="project-media" aria-label="Geometric Face Morphing and Population-Average Modeling preview">
+    <source src="face-morphing/media/morph_sequence.mp4" type="video/mp4">
+  </video>
+  <span>Geometric Vision</span>
+  <h2>Geometric Face Morphing and Population-Average Modeling</h2>
+  <p>Developed a geometry-based morphing pipeline using facial correspondences, Delaunay triangulation, affine warping, population averages, and controlled extrapolation.</p>
+</a>
+<a class="project-card" href="frequency-blending/">
+  <img src="frequency-blending/media/oraple.png" alt="Frequency-Domain Image Processing and Multi-Resolution Blending preview" loading="lazy">
+  <span>Frequency Analysis</span>
+  <h2>Frequency-Domain Image Processing and Multi-Resolution Blending</h2>
+  <p>Implemented classical frequency-domain and multi-resolution techniques for edge detection, sharpening, hybrid images, Fourier analysis, and seamless image blending.</p>
+</a>
+<a class="project-card" href="computational-photography/">
+  <img src="computational-photography/media/lady.jpg" alt="Computational Restoration of Historical Glass-Plate Photography preview" loading="lazy">
+  <span>Computational Imaging</span>
+  <h2>Computational Restoration of Historical Glass-Plate Photography</h2>
+  <p>Built a multiscale image-alignment pipeline to reconstruct color photographs from historical glass-plate negatives using pyramid search, edge-aware scoring, and channel registration.</p>
+</a>
+  </section>
+</main>
+<footer>Technical portfolio by Aadit Sood.</footer>
 </body>
 </html>
