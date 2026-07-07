@@ -1,86 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aadit Sood | Technical Portfolio</title>
-  <link rel="stylesheet" href="styles.css?v=portfolio-positioning">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aadit Sood</title>
+  <meta name="description" content="Aadit Sood — UC Berkeley EECS graduate working across machine learning, software engineering, autonomy, and technical research." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-<header class="site-header">
-  <a class="brand" href="./">Aadit Sood</a>
-  <nav aria-label="Primary navigation">
-    <a href="./">Home</a>
-    <a href="#work">Work</a>
-  </nav>
-</header>
-<main>
-  <section class="home-hero">
-    <p class="eyebrow">Computer Vision · Perception · Generative AI · Remote Sensing</p>
-    <h1>Applied research in computer vision, perception, and generative AI.</h1>
-    <p class="lede">A portfolio of research-driven systems and implementation studies across computational imaging, geometric vision, diffusion models, remote sensing, and camera-based perception. These projects emphasize building models and pipelines from first principles, analyzing failure modes, and adapting modern vision methods to real visual data.</p>
-  </section>
-  <section id="work" class="project-grid" aria-label="Technical writeups">
-<a class="project-card" href="urban-tree-stress/">
-  <img src="urban-tree-stress/media/groundingdino-separated-boxes.png" alt="UAV-Based Tree Crown Detection for Urban Tree Stress Analysis preview" loading="lazy">
-  <span>Remote Sensing</span>
-  <h2>UAV-Based Tree Crown Detection for Urban Tree Stress Analysis</h2>
-  <p>Developed a multimodal vision pipeline for detecting and segmenting individual tree crowns from UAV imagery, combining RGB, vegetation, and height-derived signals with GroundingDINO, Segment Anything, and bounding-box refinement.</p>
-</a>
-<a class="project-card" href="light-fields/">
-  <video autoplay loop muted playsinline class="project-media" aria-label="Light Field Refocusing and Synthetic Aperture Rendering preview">
-    <source src="light-fields/media/chess_focus.mp4" type="video/mp4">
-  </video>
-  <span>Computational Imaging</span>
-  <h2>Light Field Refocusing and Synthetic Aperture Rendering</h2>
-  <p>Implemented light-field rendering techniques for computational refocusing and synthetic aperture control using structured camera arrays and handheld capture experiments.</p>
-</a>
-<a class="project-card" href="augmented-reality/">
-  <img src="augmented-reality/media/calibrating_camera.png" alt="Marker-Based Augmented Reality with Camera Calibration preview" loading="lazy">
-  <span>Augmented Reality</span>
-  <h2>Marker-Based Augmented Reality with Camera Calibration</h2>
-  <p>Built a camera-calibrated AR pipeline that tracks 2D keypoints, estimates projection matrices, and renders 3D geometry into real video frames.</p>
-</a>
-<a class="project-card" href="mnist-diffusion-unet/">
-  <img src="mnist-diffusion-unet/media/e555.png" alt="Denoising U-Net Training for Digit Diffusion preview" loading="lazy">
-  <span>Diffusion Models</span>
-  <h2>Denoising U-Net Training for Digit Diffusion</h2>
-  <p>Trained a compact U-Net diffusion model for noisy image restoration, timestep-conditioned denoising, and label-conditioned digit generation.</p>
-</a>
-<a class="project-card" href="diffusion-imaging/">
-  <img src="diffusion-imaging/media/skull.png" alt="Diffusion-Based Image Generation, Editing, and Restoration preview" loading="lazy">
-  <span>Generative AI</span>
-  <h2>Diffusion-Based Image Generation, Editing, and Restoration</h2>
-  <p>Explored diffusion-based generation and editing with iterative denoising, classifier-free guidance, image-to-image translation, inpainting, and prompt-conditioned visual transformations.</p>
-</a>
-<a class="project-card" href="panorama-reconstruction/">
-  <img src="panorama-reconstruction/media/vlsb_fin.png" alt="Panorama Reconstruction with Homographies, Feature Matching, and RANSAC preview" loading="lazy">
-  <span>Robust Estimation</span>
-  <h2>Panorama Reconstruction with Homographies, Feature Matching, and RANSAC</h2>
-  <p>Built a panorama reconstruction pipeline combining homography estimation, feature detection, adaptive non-maximal suppression, descriptor matching, RANSAC, and image warping.</p>
-</a>
-<a class="project-card" href="face-morphing/">
-  <video autoplay loop muted playsinline class="project-media" aria-label="Geometric Face Morphing and Population-Average Modeling preview">
-    <source src="face-morphing/media/morph_sequence.mp4" type="video/mp4">
-  </video>
-  <span>Geometric Vision</span>
-  <h2>Geometric Face Morphing and Population-Average Modeling</h2>
-  <p>Developed a geometry-based morphing pipeline using facial correspondences, Delaunay triangulation, affine warping, population averages, and controlled extrapolation.</p>
-</a>
-<a class="project-card" href="frequency-blending/">
-  <img src="frequency-blending/media/oraple.png" alt="Frequency-Domain Image Processing and Multi-Resolution Blending preview" loading="lazy">
-  <span>Frequency Analysis</span>
-  <h2>Frequency-Domain Image Processing and Multi-Resolution Blending</h2>
-  <p>Implemented classical frequency-domain and multi-resolution techniques for edge detection, sharpening, hybrid images, Fourier analysis, and seamless image blending.</p>
-</a>
-<a class="project-card" href="computational-photography/">
-  <img src="computational-photography/media/lady.jpg" alt="Computational Restoration of Historical Glass-Plate Photography preview" loading="lazy">
-  <span>Computational Imaging</span>
-  <h2>Computational Restoration of Historical Glass-Plate Photography</h2>
-  <p>Built a multiscale image-alignment pipeline to reconstruct color photographs from historical glass-plate negatives using pyramid search, edge-aware scoring, and channel registration.</p>
-</a>
-  </section>
-</main>
-<footer>Technical portfolio by Aadit Sood.</footer>
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="Aadit Sood home">Aadit Sood</a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="#work">Work</a>
+      <a href="#research">Research</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero section">
+      <div class="hero-copy">
+        <p class="eyebrow">UC Berkeley EECS Graduate · Machine Learning · Autonomy</p>
+        <h1>Building technical systems at the edge of software, AI, and the physical world.</h1>
+        <p class="hero-text">
+          I’m Aadit, a UC Berkeley EECS graduate interested in machine learning, software engineering, and systems that connect models to real-world environments. My work spans computer vision, perception/SLAM for autonomous systems, reinforcement learning, and hardware-adjacent software.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#research">See work</a>
+          <a class="button secondary" href="mailto:aadit.sood@berkeley.edu">Contact me</a>
+        </div>
+      </div>
+      <aside class="hero-card" aria-label="Profile summary">
+        <div class="card-topline">Currently</div>
+        <h2>UC Berkeley EECS graduate</h2>
+        <p>Regents’ and Chancellor’s Scholar. Focused on ML research, perception systems, infrastructure, and early-stage technical products.</p>
+        <div class="tags">
+          <span>Computer Vision</span>
+          <span>RLHF</span>
+          <span>Autonomy</span>
+          <span>Startups</span>
+        </div>
+      </aside>
+    </section>
+
+    <section id="work" class="section split">
+      <div>
+        <p class="eyebrow">Experience</p>
+        <h2>Where I’ve worked</h2>
+      </div>
+      <div class="timeline">
+        <article class="timeline-item">
+          <h3>Accenture · Machine Learning Engineer Intern</h3>
+          <p>Worked on computer vision and anomaly detection for drone footage, connecting ML models to industrial inspection and real-world data pipelines.</p>
+        </article>
+        <article class="timeline-item">
+          <h3>Amazon · Software Development Engineer Intern</h3>
+          <p>Built database and infrastructure systems with a focus on reliability, backend engineering, and scalable production software.</p>
+        </article>
+        <article class="timeline-item">
+          <h3>Formula Electric Berkeley · Perception Lead</h3>
+          <p>Led perception work for autonomous systems, with emphasis on robotics, mapping, and software that sits close to hardware.</p>
+        </article>
+        <article class="timeline-item">
+          <h3>Blume Venture Capital · Analyst</h3>
+          <p>Supported investment analysis and portfolio strategy, leveraging market insights and financial acumen to drive data-backed decisions.</p>
+        </article>
+        <article class="timeline-item">
+          <h3>Convertible AI · Machine Learning Engineer</h3>
+          <p>Worked on recommendation systems at an early-stage AI startup, combining product iteration with applied ML engineering.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="research" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">Research, Papers, & Projects</p>
+        <h2>Recent technical work</h2>
+        <p>Selected research areas, papers, projects, and implementation studies spanning applied ML, computer vision, autonomy, and language-model alignment.</p>
+      </div>
+      <div class="cards three">
+        <article class="card">
+          <p class="project-label">Optimization</p>
+          <h3>AdamW Transferability</h3>
+          <p>Research on how AdamW optimizer behavior transfers across model scales and architectures, with emphasis on generalization and training dynamics.</p>
+          <a href="#contact" class="text-link">Paper coming soon →</a>
+        </article>
+        <article class="card">
+          <p class="project-label">Language-Model Alignment</p>
+          <h3>Confidence-Weighted Preference Optimization for Instruction-Following RLHF</h3>
+          <p>Compared offline preference optimization, reward modeling, and online RLHF methods under a controlled instruction-following evaluation. The study evaluates DPO, IPO, AOT-style quantile matching, Bradley-Terry reward modeling, GRPO, DrGRPO, GSPO, and a confidence-weighted DPO variant that upweights clearer reference-corrected preference margins.</p>
+          <a href="assets/papers/confidence-weighted-preference-optimization-rlhf.pdf" class="text-link" target="_blank" rel="noreferrer">Read paper →</a>
+        </article>
+        <a class="card work-card" href="projectportfolio/urban-tree-stress/" target="_blank" rel="noreferrer">
+          <img class="card-media" src="assets/project-previews/uav-tree-crowns.jpg" alt="UAV-Based Tree Crown Detection for Urban Tree Stress Analysis preview" loading="lazy">
+          <p class="project-label">Remote Sensing</p>
+          <h3>UAV-Based Tree Crown Detection for Urban Tree Stress Analysis</h3>
+          <p>Developed a multimodal vision pipeline for detecting and segmenting individual tree crowns from UAV imagery, combining RGB, vegetation, and height-derived signals with GroundingDINO, Segment Anything, and bounding-box refinement.</p>
+        </a>
+        <article class="card">
+          <p class="project-label">AI Systems</p>
+          <h3>KaRL</h3>
+          <p>A coordination layer for companies using multiple reinforcement-learning-powered AI agents. The project explores how independently learning agents can interfere with each other and how coordination infrastructure can improve multi-agent behavior.</p>
+          <a href="#contact" class="text-link">Discuss project →</a>
+        </article>
+        <a class="card work-card" href="projectportfolio/light-fields/" target="_blank" rel="noreferrer">
+          <video autoplay loop muted playsinline class="card-media" aria-label="Light Field Refocusing and Synthetic Aperture Rendering preview">
+            <source src="assets/project-previews/light-fields.mp4" type="video/mp4">
+          </video>
+          <p class="project-label">Computational Imaging</p>
+          <h3>Light Field Refocusing and Synthetic Aperture Rendering</h3>
+          <p>Implemented light-field rendering techniques for computational refocusing and synthetic aperture control using structured camera arrays and handheld capture experiments.</p>
+        </a>
+        <a class="card work-card" href="projectportfolio/augmented-reality/" target="_blank" rel="noreferrer">
+          <img class="card-media" src="assets/project-previews/augmented-reality.jpg" alt="Marker-Based Augmented Reality with Camera Calibration preview" loading="lazy">
+          <p class="project-label">Augmented Reality</p>
+          <h3>Marker-Based Augmented Reality with Camera Calibration</h3>
+          <p>Built a camera-calibrated AR pipeline that tracks 2D keypoints, estimates projection matrices, and renders 3D geometry into real video frames.</p>
+        </a>
+        <a class="card work-card" href="projectportfolio/mnist-diffusion-unet/" target="_blank" rel="noreferrer">
+          <img class="card-media" src="assets/project-previews/mnist-diffusion-unet.jpg" alt="Denoising U-Net Training for Digit Diffusion preview" loading="lazy">
+          <p class="project-label">Diffusion Models</p>
+          <h3>Denoising U-Net Training for Digit Diffusion</h3>
+          <p>Trained a compact U-Net diffusion model for noisy image restoration, timestep-conditioned denoising, and label-conditioned digit generation.</p>
+        </a>
+        <a class="card work-card" href="projectportfolio/diffusion-imaging/" target="_blank" rel="noreferrer">
+          <img class="card-media" src="assets/project-previews/diffusion-imaging.jpg" alt="Diffusion-Based Image Generation, Editing, and Restoration preview" loading="lazy">
+          <p class="project-label">Generative AI</p>
+          <h3>Diffusion-Based Image Generation, Editing, and Restoration</h3>
+          <p>Explored diffusion-based generation and editing with iterative denoising, classifier-free guidance, image-to-image translation, inpainting, and prompt-conditioned visual transformations.</p>
+        </a>
+        <a class="card work-card" href="projectportfolio/panorama-reconstruction/" target="_blank" rel="noreferrer">
+          <img class="card-media" src="assets/project-previews/panorama-reconstruction.jpg" alt="Panorama Reconstruction with Homographies, Feature Matching, and RANSAC preview" loading="lazy">
+          <p class="project-label">Robust Estimation</p>
+          <h3>Panorama Reconstruction with Homographies, Feature Matching, and RANSAC</h3>
+          <p>Built a panorama reconstruction pipeline combining homography estimation, feature detection, adaptive non-maximal suppression, descriptor matching, RANSAC, and image warping.</p>
+        </a>
+        <a class="card work-card" href="projectportfolio/face-morphing/" target="_blank" rel="noreferrer">
+          <video autoplay loop muted playsinline class="card-media" aria-label="Geometric Face Morphing and Population-Average Modeling preview">
+            <source src="assets/project-previews/face-morphing.mp4" type="video/mp4">
+          </video>
+          <p class="project-label">Geometric Vision</p>
+          <h3>Geometric Face Morphing and Population-Average Modeling</h3>
+          <p>Developed a geometry-based morphing pipeline using facial correspondences, Delaunay triangulation, affine warping, population averages, and controlled extrapolation.</p>
+        </a>
+        <a class="card work-card" href="projectportfolio/frequency-blending/" target="_blank" rel="noreferrer">
+          <img class="card-media" src="assets/project-previews/frequency-blending.jpg" alt="Frequency-Domain Image Processing and Multi-Resolution Blending preview" loading="lazy">
+          <p class="project-label">Frequency Analysis</p>
+          <h3>Frequency-Domain Image Processing and Multi-Resolution Blending</h3>
+          <p>Implemented classical frequency-domain and multi-resolution techniques for edge detection, sharpening, hybrid images, Fourier analysis, and seamless image blending.</p>
+        </a>
+        <a class="card work-card" href="projectportfolio/computational-photography/" target="_blank" rel="noreferrer">
+          <img class="card-media" src="assets/project-previews/computational-photography.jpg" alt="Computational Restoration of Historical Glass-Plate Photography preview" loading="lazy">
+          <p class="project-label">Computational Imaging</p>
+          <h3>Computational Restoration of Historical Glass-Plate Photography</h3>
+          <p>Built a multiscale image-alignment pipeline to reconstruct color photographs from historical glass-plate negatives using pyramid search, edge-aware scoring, and channel registration.</p>
+        </a>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact">
+      <p class="eyebrow">Contact</p>
+      <h2>Interested in AI, autonomy, physical AI, startups, or research?</h2>
+      <p>I’m always happy to talk about technical work, early-stage ideas, and opportunities at the intersection of machine learning and real-world systems.</p>
+      <div class="contact-links">
+        <a class="button primary" href="mailto:aadit.sood@berkeley.edu">aadit.sood@berkeley.edu</a>
+        <a class="button secondary" href="https://www.linkedin.com/in/aadit-sood/" target="_blank" rel="noreferrer">LinkedIn</a>
+        <a class="button secondary" href="https://github.com/aadit-sood" target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© <span id="year"></span> Aadit Sood</span>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Computational Restoration of Historical Glass-Plate Photography | Aadit Sood</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="../">Aadit Sood</a>
+  <nav aria-label="Primary navigation">
+    <a href="../">Home</a>
+    <a href="../urban-tree-stress/">Remote Sensing</a>
+    <a href="../light-fields/">Computational Imaging</a>
+    <a href="../augmented-reality/">Camera Geometry</a>
+    <a href="../mnist-diffusion-unet/">Diffusion Models</a>
+    <a href="../diffusion-imaging/">Generative AI</a>
+    <a href="../panorama-reconstruction/">Robust Estimation</a>
+    <a href="../face-morphing/">Geometric Vision</a>
+    <a href="../frequency-blending/">Frequency Analysis</a>
+    <a aria-current="page" href="../computational-photography/">Computational Imaging</a>
+  </nav>
+</header>
+<main>
+  <section class="project-hero">
+    <div>
+      <p class="eyebrow">Computational Imaging</p>
+      <h1>Computational Restoration of Historical Glass-Plate Photography</h1>
+      <p class="lede">A reconstruction pipeline for Prokudin-Gorskii glass-plate negatives using channel alignment, multiscale search, central-window scoring, and edge-domain matching.</p>
+    </div>
+    <img src="../../computational-photography/media/lady.jpg" alt="Computational Restoration of Historical Glass-Plate Photography preview">
+  </section>
+  <div class="writeup-layout">
+    <aside class="toc" aria-label="Page sections">
+      <a href="#abstract">Abstract</a>
+      <a href="#plate-model-and-alignment-objective">Plate Model and Alignment Objective</a>
+      <a href="#multiscale-search">Multiscale Search</a>
+      <a href="#edge-domain-alignment">Edge-Domain Alignment</a>
+      <a href="#named-results">Named Results</a>
+      <a href="#technical-takeaways-and-future-work">Technical Takeaways and Future Work</a>
+    </aside>
+    <article>
+<section class="writeup-section" id="abstract">
+  <h2>Abstract</h2>
+  <p>Sergei Prokudin-Gorskii captured scenes through red, green, and blue filters on glass plates long before color printing was practical. The digitized negatives preserve those three monochrome exposures as a vertical stack. This work reconstructs color photographs by splitting the stack, estimating the channel displacement, and recombining the aligned channels into a single RGB image.</p>
+  <p>The implementation studies a progression of alignment objectives: raw pixel distance, normalized cross-correlation, structural similarity, cropped central-window scoring, pyramid search for large displacements, and Sobel edge features for cases where channel intensities differ. The goal is not just to colorize, but to understand why some metrics fail and what preprocessing makes the optimization more stable.</p>
+</section>
+<section class="writeup-section" id="plate-model-and-alignment-objective">
+  <h2>Plate Model and Alignment Objective</h2>
+  <p>Each glass plate image is divided into three equal-height images. I use the blue channel as the fixed reference and search for translations of the green and red channels. If <span class="inline-math">B(x,y)</span> is the reference and <span class="inline-math">R(x,y)</span> is a moving channel, a candidate displacement <span class="inline-math">(u,v)</span> is evaluated on the overlapping cropped region.</p>
+  <div class="math-block">NCC(B,R;u,v)=<span class="fraction"><span>∑<sub>x,y</sub>(B(x,y)−B̄)(R(x+u,y+v)−R̄)</span><span><span class="sqrt">√<span>∑<sub>x,y</sub>(B(x,y)−B̄)<sup>2</sup></span></span><span class="sqrt">√<span>∑<sub>x,y</sub>(R(x+u,y+v)−R̄)<sup>2</sup></span></span></span></span></div>
+  <p>I tested Euclidean distance, sum of squared differences, normalized cross-correlation, and structural similarity. Normalized cross-correlation was the most consistent because it normalizes away some brightness scale differences between channels. For small images, the algorithm performs an exhaustive search over a fixed displacement window and returns the shift with the highest score.</p>
+  <p>The borders of the scanned plates contain high-contrast artifacts that can dominate the score even though they are not useful scene content. To reduce this, I crop the outer region during scoring and use a central window for the comparison. This made the objective focus on shared structure rather than plate edges.</p>
+</section>
+<section class="writeup-section" id="multiscale-search">
+  <h2>Multiscale Search</h2>
+  <p>Large scans can require displacements far beyond a small fixed search window. A full-resolution exhaustive search would be slow and brittle, so I used a coarse-to-fine image pyramid. At the coarsest scale, the algorithm searches broadly on a small image. The resulting displacement is doubled when moving to the next finer level, then locally refined.</p>
+  <div class="math-block">Δ<sub>ell−1</sub>=2Δ<sub>ell</sub>+argmax<sub>d∈[−r,r]<sup>2</sup></sub>NCC(B<sub>ell−1</sub>,R<sub>ell−1</sub>;2Δ<sub>ell</sub>+d)</div>
+  <p>This is computationally useful because the coarse level captures large motion cheaply, while the fine levels only need local corrections. It also makes the implementation less dependent on a hand-tuned full-resolution search radius.</p>
+</section>
+<section class="writeup-section" id="edge-domain-alignment">
+  <h2>Edge-Domain Alignment</h2>
+  <p>Some plates, especially the Emir image, are difficult because the same material can appear with very different intensity in different color filters. A raw intensity comparison can then prefer the wrong shift. To address this, I experimented with Sobel filtering before alignment. The Sobel operators approximate horizontal and vertical derivatives:</p>
+  <div class="math-block">G<sub>x</sub>=I*S<sub>x</sub>,<span class="math-gap"></span> G<sub>y</sub>=I*S<sub>y</sub>,<span class="math-gap"></span> |nabla I|=<span class="sqrt">√<span>G<sub>x</sub><sup>2</sup>+G<sub>y</sub><sup>2</sup></span></span></div>
+  <p>The edge magnitude keeps boundaries and suppresses much of the absolute brightness variation. After transforming channels into edge maps, the same NCC-based search can align structure rather than raw tone.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../computational-photography/media/lady_presobal.jpg" alt="Original composite before edge-aware alignment" loading="lazy">
+    <figcaption>Original composite before edge-aware alignment</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/PNG image.png" alt="Sobel edge magnitude" loading="lazy">
+    <figcaption>Sobel edge magnitude</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/lady.jpg" alt="Aligned output after edge-aware scoring" loading="lazy">
+    <figcaption>Aligned output after edge-aware scoring</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="named-results">
+  <h2>Named Results</h2>
+  <h3>Small Plates: Direct Exhaustive Search</h3>
+  <p>The smaller plates fit within a modest search window, so direct exhaustive alignment is sufficient. The final displacements were recorded with each output in the original experiment, and the visible result is clean alignment without needing a pyramid.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../computational-photography/media/monastery_output.jpg" alt="Monastery, direct search" loading="lazy">
+    <figcaption>Monastery, direct search</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/cathedral_output.jpg" alt="Cathedral, direct search" loading="lazy">
+    <figcaption>Cathedral, direct search</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/tobolsk_output.jpg" alt="Tobolsk, direct search" loading="lazy">
+    <figcaption>Tobolsk, direct search</figcaption>
+  </figure>
+</div>
+  <h3>Large Plates: Pyramid Alignment</h3>
+  <p>High-resolution scans require larger shifts. Pyramid search aligned the red and green channels while keeping runtime manageable. The examples show that even images with substantial channel displacement can be reconstructed when the scoring window avoids border artifacts.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../computational-photography/media/church.jpg" alt="Church" loading="lazy">
+    <figcaption>Church</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/emir.jpg" alt="Emir" loading="lazy">
+    <figcaption>Emir</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/harvesters.jpg" alt="Harvesters" loading="lazy">
+    <figcaption>Harvesters</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/icon.jpg" alt="Icon" loading="lazy">
+    <figcaption>Icon</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/melons.jpg" alt="Melons" loading="lazy">
+    <figcaption>Melons</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/onion_church.jpg" alt="Onion Church" loading="lazy">
+    <figcaption>Onion Church</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/sculpture.jpg" alt="Sculpture" loading="lazy">
+    <figcaption>Sculpture</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/self_portrait.jpg" alt="Self Portrait" loading="lazy">
+    <figcaption>Self Portrait</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/three_generations.jpg" alt="Three Generations" loading="lazy">
+    <figcaption>Three Generations</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/train.jpg" alt="Train" loading="lazy">
+    <figcaption>Train</figcaption>
+  </figure>
+</div>
+  <h3>Additional Historical Plates</h3>
+  <p>I also tested the pipeline on additional images from the collection. These examples helped check that the alignment strategy generalized beyond the provided set.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../computational-photography/media/custom_image1.jpg" alt="Na Uralie" loading="lazy">
+    <figcaption>Na Uralie</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/custom_image2.jpg" alt="V Malorossii" loading="lazy">
+    <figcaption>V Malorossii</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../computational-photography/media/sunset.jpg" alt="Sunset" loading="lazy">
+    <figcaption>Sunset</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="technical-takeaways-and-future-work">
+  <h2>Technical Takeaways and Future Work</h2>
+  <p>The most important design choice was not simply the similarity metric, but the pixels used by the metric. Cropping, central-window scoring, and edge preprocessing all reduce the chance that the optimizer follows scanner artifacts or color-channel brightness differences.</p>
+  <p>Future improvements would include automatic border detection after alignment, contrast normalization before scoring, and a feature-based fallback for plates where derivative structure is still ambiguous.</p>
+</section>
+    </article>
+  </div>
+</main>
+<footer>Technical portfolio by Aadit Sood.</footer>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Light Field Refocusing and Synthetic Aperture Rendering | Aadit Sood</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="../">Aadit Sood</a>
+  <nav aria-label="Primary navigation">
+    <a href="../">Home</a>
+    <a href="../urban-tree-stress/">Remote Sensing</a>
+    <a aria-current="page" href="../light-fields/">Computational Imaging</a>
+    <a href="../augmented-reality/">Camera Geometry</a>
+    <a href="../mnist-diffusion-unet/">Diffusion Models</a>
+    <a href="../diffusion-imaging/">Generative AI</a>
+    <a href="../panorama-reconstruction/">Robust Estimation</a>
+    <a href="../face-morphing/">Geometric Vision</a>
+    <a href="../frequency-blending/">Frequency Analysis</a>
+    <a href="../computational-photography/">Computational Imaging</a>
+  </nav>
+</header>
+<main>
+  <section class="project-hero">
+    <div>
+      <p class="eyebrow">Computational Imaging</p>
+      <h1>Light Field Refocusing and Synthetic Aperture Rendering</h1>
+      <p class="lede">A light field rendering study using shift-and-average refocusing, synthetic aperture control, Stanford datasets, and a custom handheld capture experiment.</p>
+    </div>
+    <video autoplay loop muted playsinline class="project-media" aria-label="Light Field Refocusing and Synthetic Aperture Rendering preview">
+      <source src="../../light-fields/media/chess_focus.mp4" type="video/mp4">
+    </video>
+  </section>
+  <div class="writeup-layout">
+    <aside class="toc" aria-label="Page sections">
+      <a href="#abstract">Abstract</a>
+      <a href="#depth-refocusing">Depth Refocusing</a>
+      <a href="#synthetic-aperture">Synthetic Aperture</a>
+      <a href="#custom-capture-experiment">Custom Capture Experiment</a>
+      <a href="#additional-implementation-notes">Additional Implementation Notes</a>
+      <a href="#technical-takeaways-and-future-work">Technical Takeaways and Future Work</a>
+    </aside>
+    <article>
+<section class="writeup-section" id="abstract">
+  <h2>Abstract</h2>
+  <p>A light field records multiple views of a scene from a grid of camera positions. Because each view observes the scene from a slightly different angle, computational rendering can refocus after capture and simulate different aperture sizes. This work implements those effects with shift-and-average rendering.</p>
+</section>
+<section class="writeup-section" id="depth-refocusing">
+  <h2>Depth Refocusing</h2>
+  <p>For a target focus depth, each sub-aperture image is shifted according to its grid coordinate before averaging. Points at the chosen depth align across views and become sharp, while points at other depths remain misaligned and blur.</p>
+  <div class="math-block">I<sub>refocus</sub>(x,y;α)=<span class="fraction"><span>1</span><span>N</span></span>∑<sub>u,v</sub>L<sub>u,v</sub>(x+α(u−u<sub>0</sub>),y+α(v−v<sub>0</sub>))</div>
+  <p>Sweeping <span class="inline-math">α</span> produces a focus animation. The Stanford light field datasets show the effect clearly because the captures are dense and precisely aligned.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <video autoplay loop muted playsinline class="project-media" aria-label="Chess depth refocusing">
+      <source src="../../light-fields/media/chess_focus.mp4" type="video/mp4">
+    </video>
+    <figcaption>Chess depth refocusing</figcaption>
+  </figure>
+  <figure class="media-card">
+    <video autoplay loop muted playsinline class="project-media" aria-label="Lego depth refocusing">
+      <source src="../../light-fields/media/legofocus.mp4" type="video/mp4">
+    </video>
+    <figcaption>Lego depth refocusing</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="synthetic-aperture">
+  <h2>Synthetic Aperture</h2>
+  <p>A synthetic aperture is created by averaging different numbers of angular views. A small aperture uses a small neighborhood around the central view, keeping more of the scene sharp. A large aperture averages many viewpoints, increasing blur away from the focus plane.</p>
+  <div class="math-block">I<sub>aperture</sub>(x,y;r)=<span class="fraction"><span>1</span><span>|S<sub>r</sub>|</span></span>∑<sub>(u,v)∈ S<sub>r</sub></sub>L<sub>u,v</sub>(x+α(u−u<sub>0</sub>),y+α(v−v<sub>0</sub>))</div>
+  <div class="media-grid">
+  <figure class="media-card">
+    <video autoplay loop muted playsinline class="project-media" aria-label="Lego synthetic aperture sweep">
+      <source src="../../light-fields/media/legoap.mp4" type="video/mp4">
+    </video>
+    <figcaption>Lego synthetic aperture sweep</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="custom-capture-experiment">
+  <h2>Custom Capture Experiment</h2>
+  <p>I also captured a custom light field with an iPhone: 50 images arranged as a 10 by 5 grid. The sample below shows two rows of that dataset. Unlike the Stanford captures, the custom set was handheld and sparse, which made refocusing and aperture synthesis less stable.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../light-fields/media/0_0.png" alt="Custom capture row 0 col 0" loading="lazy">
+    <figcaption>Custom capture row 0 col 0</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../light-fields/media/0_1.png" alt="Custom capture row 0 col 1" loading="lazy">
+    <figcaption>Custom capture row 0 col 1</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../light-fields/media/0_2.png" alt="Custom capture row 0 col 2" loading="lazy">
+    <figcaption>Custom capture row 0 col 2</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../light-fields/media/0_3.png" alt="Custom capture row 0 col 3" loading="lazy">
+    <figcaption>Custom capture row 0 col 3</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../light-fields/media/0_4.png" alt="Custom capture row 0 col 4" loading="lazy">
+    <figcaption>Custom capture row 0 col 4</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../light-fields/media/1_0.png" alt="Custom capture row 1 col 0" loading="lazy">
+    <figcaption>Custom capture row 1 col 0</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../light-fields/media/1_1.png" alt="Custom capture row 1 col 1" loading="lazy">
+    <figcaption>Custom capture row 1 col 1</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../light-fields/media/1_2.png" alt="Custom capture row 1 col 2" loading="lazy">
+    <figcaption>Custom capture row 1 col 2</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../light-fields/media/1_3.png" alt="Custom capture row 1 col 3" loading="lazy">
+    <figcaption>Custom capture row 1 col 3</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../light-fields/media/1_4.png" alt="Custom capture row 1 col 4" loading="lazy">
+    <figcaption>Custom capture row 1 col 4</figcaption>
+  </figure>
+</div>
+  <p>The custom output demonstrates why capture geometry matters. Too few angular samples, hand motion, inconsistent spacing, and missing camera calibration all compound into blur and misalignment.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <video autoplay loop muted playsinline class="project-media" aria-label="Custom depth refocus attempt">
+      <source src="../../light-fields/media/car_focus.mp4" type="video/mp4">
+    </video>
+    <figcaption>Custom depth refocus attempt</figcaption>
+  </figure>
+  <figure class="media-card">
+    <video autoplay loop muted playsinline class="project-media" aria-label="Custom aperture attempt">
+      <source src="../../light-fields/media/car_aperture.mp4" type="video/mp4">
+    </video>
+    <figcaption>Custom aperture attempt</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="additional-implementation-notes">
+  <h2>Additional Implementation Notes</h2>
+  <p>The shift-and-average equation can be understood by thinking about parallax. Points at different depths move by different amounts as the camera position changes. If the shifts are chosen for one depth, points at that depth align before averaging and remain sharp. Points at other depths do not align and therefore blur. Refocusing is essentially choosing which depth plane should be made consistent across the angular views.</p>
+  <p>Synthetic aperture rendering changes the angular support of the average. A small aperture uses only views near the center, so there is little parallax variation and much of the scene remains sharp. A large aperture uses a wider range of views, so objects away from the selected focus depth are averaged over a larger displacement and blur more strongly. This mimics the depth-of-field behavior of a physical lens.</p>
+  <p>The Stanford datasets work well because the cameras are sampled on a regular grid with controlled spacing. The algorithm assumes that the <span class="inline-math">(u,v)</span> view coordinates are meaningful and that images are already aligned except for the expected parallax. When those assumptions hold, the implementation is compact and the rendered GIFs clearly show focus moving through the scene.</p>
+  <p>The custom iPhone dataset was intentionally more difficult. Handheld capture introduces translation and rotation errors that are not represented by the simple grid model. The angular sampling was also sparse: five columns do not provide enough horizontal viewpoints to synthesize a strong aperture effect. Averaging misaligned views therefore produces blur that is not the desired depth-of-field blur.</p>
+  <p>A better capture procedure would fix the phone to a sliding rig, use a calibration pattern to estimate camera positions, and capture many more views with consistent exposure. With calibrated positions, the renderer could use more accurate shifts or even full view warps rather than assuming a simple regular grid.</p>
+</section>
+<section class="writeup-section" id="technical-takeaways-and-future-work">
+  <h2>Technical Takeaways and Future Work</h2>
+  <p>The algorithms are surprisingly simple once the data is well captured: refocusing and aperture control are both shift-and-average operations over different angular subsets. The difficulty moves into sampling, calibration, and alignment.</p>
+  <p>Future work would use a fixed capture rig, denser angular sampling, calibrated camera positions, and automatic alignment before rendering.</p>
+</section>
+    </article>
+  </div>
+</main>
+<footer>Technical portfolio by Aadit Sood.</footer>
+</body>
+</html>

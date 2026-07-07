@@ -1,3 +1,3 @@
-# asood04.github.io
+# aadit-sood
 
-Personal technical portfolio for visual computing explorations.
+Personal Site Code

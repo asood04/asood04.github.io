@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frequency-Domain Image Processing and Multi-Resolution Blending | Aadit Sood</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="../">Aadit Sood</a>
+  <nav aria-label="Primary navigation">
+    <a href="../">Home</a>
+    <a href="../urban-tree-stress/">Remote Sensing</a>
+    <a href="../light-fields/">Computational Imaging</a>
+    <a href="../augmented-reality/">Camera Geometry</a>
+    <a href="../mnist-diffusion-unet/">Diffusion Models</a>
+    <a href="../diffusion-imaging/">Generative AI</a>
+    <a href="../panorama-reconstruction/">Robust Estimation</a>
+    <a href="../face-morphing/">Geometric Vision</a>
+    <a aria-current="page" href="../frequency-blending/">Frequency Analysis</a>
+    <a href="../computational-photography/">Computational Imaging</a>
+  </nav>
+</header>
+<main>
+  <section class="project-hero">
+    <div>
+      <p class="eyebrow">Frequency Analysis</p>
+      <h1>Frequency-Domain Image Processing and Multi-Resolution Blending</h1>
+      <p class="lede">A study of edge filters, derivative-of-Gaussian operators, unsharp masking, hybrid images, Fourier analysis, Gaussian/Laplacian stacks, and mask-based multi-resolution blending.</p>
+    </div>
+    <img src="../../frequency-blending/media/oraple.png" alt="Frequency-Domain Image Processing and Multi-Resolution Blending preview">
+  </section>
+  <div class="writeup-layout">
+    <aside class="toc" aria-label="Page sections">
+      <a href="#abstract">Abstract</a>
+      <a href="#finite-differences-and-derivative-of-gaussian">Finite Differences and Derivative of Gaussian</a>
+      <a href="#sharpening-as-high-frequency-amplification">Sharpening as High-Frequency Amplification</a>
+      <a href="#hybrid-images-and-fourier-interpretation">Hybrid Images and Fourier Interpretation</a>
+      <a href="#gaussian-and-laplacian-stacks">Gaussian and Laplacian Stacks</a>
+      <a href="#multi-resolution-blending-results">Multi-Resolution Blending Results</a>
+      <a href="#additional-implementation-notes">Additional Implementation Notes</a>
+      <a href="#technical-takeaways-and-future-work">Technical Takeaways and Future Work</a>
+    </aside>
+    <article>
+<section class="writeup-section" id="abstract">
+  <h2>Abstract</h2>
+  <p>This writeup studies images as combinations of spatial frequencies. Low frequencies carry smooth structure and broad color changes, while high frequencies carry edges, texture, and fine detail. By explicitly separating those bands, we can detect edges, sharpen images, create hybrid perceptual effects, and composite images more smoothly.</p>
+  <p>The investigation progresses from local derivative filters to frequency-domain interpretation, then to stack-based blending. Each stage uses the same core idea: filtering is a way to decide which visual scale should be emphasized, suppressed, or blended.</p>
+</section>
+<section class="writeup-section" id="finite-differences-and-derivative-of-gaussian">
+  <h2>Finite Differences and Derivative of Gaussian</h2>
+  <p>The first experiment computes image derivatives with finite difference filters. With <span class="inline-math">D<sub>x</sub>=[1,−1]</span> and <span class="inline-math">D<sub>y</sub>=[1,−1]<sup>T</sup></span>, convolution gives approximate horizontal and vertical rates of change. The gradient magnitude is then thresholded into an edge map.</p>
+  <div class="math-block">I<sub>x</sub>=I*D<sub>x</sub>,<span class="math-gap"></span> I<sub>y</sub>=I*D<sub>y</sub>,<span class="math-gap"></span> |nabla I|=<span class="sqrt">√<span>I<sub>x</sub><sup>2</sup>+I<sub>y</sub><sup>2</sup></span></span></div>
+  <p>Raw finite differences are very sensitive to noise because differentiation amplifies high-frequency variation. To reduce this, I first smooth the image with a Gaussian filter <span class="inline-math">G<sub>σ</sub></span>, then differentiate. By associativity of convolution, this two-step process is equivalent to convolving once with derivative-of-Gaussian filters.</p>
+  <div class="math-block">(I*G<sub>σ</sub>)*D<sub>x</sub>=I*(G<sub>σ</sub>*D<sub>x</sub>)</div>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/1.1origimg.png" alt="Original image" loading="lazy">
+    <figcaption>Original image</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/1.1gradx.png" alt="x derivative" loading="lazy">
+    <figcaption>x derivative</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/1.1grady.png" alt="y derivative" loading="lazy">
+    <figcaption>y derivative</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/1.1gradmag.png" alt="Raw gradient magnitude" loading="lazy">
+    <figcaption>Raw gradient magnitude</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/1.1bingradmag.png" alt="Thresholded raw gradient" loading="lazy">
+    <figcaption>Thresholded raw gradient</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/DoGx.png" alt="Derivative-of-Gaussian x filter" loading="lazy">
+    <figcaption>Derivative-of-Gaussian x filter</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/DoGy.png" alt="Derivative-of-Gaussian y filter" loading="lazy">
+    <figcaption>Derivative-of-Gaussian y filter</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/1.2dogbingradmag.png" alt="Thresholded DoG gradient" loading="lazy">
+    <figcaption>Thresholded DoG gradient</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="sharpening-as-high-frequency-amplification">
+  <h2>Sharpening as High-Frequency Amplification</h2>
+  <p>Unsharp masking sharpens an image by extracting high frequencies and adding them back to the original. A blurred version <span class="inline-math">I*G<sub>σ</sub></span> acts as the low-pass component, and the detail layer is <span class="inline-math">I−I*G<sub>σ</sub></span>. The sharpened image is:</p>
+  <div class="math-block">I<sub>sharp</sub>=I+α(I−I*G<sub>σ</sub>)</div>
+  <p>Increasing <span class="inline-math">α</span> makes edges and texture more prominent, but too much high-frequency amplification introduces unnatural halos and exaggerates noise. The Eiffel Tower test shows a second limitation: if a blur has already destroyed high-frequency information, sharpening can improve perceived contrast but cannot fully recover the original detail.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/2.1taj.jpg" alt="Original Taj Mahal" loading="lazy">
+    <figcaption>Original Taj Mahal</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/2.1taj2.png" alt="Sharpened with alpha 2" loading="lazy">
+    <figcaption>Sharpened with alpha 2</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/2.1taj5.png" alt="Sharpened with alpha 5" loading="lazy">
+    <figcaption>Sharpened with alpha 5</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/2.1taj10.png" alt="Sharpened with alpha 10" loading="lazy">
+    <figcaption>Sharpened with alpha 10</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/blurred_eiffel.png" alt="Blurred Eiffel Tower" loading="lazy">
+    <figcaption>Blurred Eiffel Tower</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/eiffel2.png" alt="Resharpened with alpha 2" loading="lazy">
+    <figcaption>Resharpened with alpha 2</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/eiffel10.png" alt="Resharpened with alpha 10" loading="lazy">
+    <figcaption>Resharpened with alpha 10</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="hybrid-images-and-fourier-interpretation">
+  <h2>Hybrid Images and Fourier Interpretation</h2>
+  <p>Hybrid images combine the high-frequency content of one image with the low-frequency content of another. Up close, the high frequencies dominate perception; from farther away or at smaller display size, the low frequencies dominate.</p>
+  <div class="math-block">H=HighPass(A)+LowPass(B)=(A−A*G<sub>σ<sub>h</sub></sub>)+B*G<sub>σ<sub>l</sub></sub></div>
+  <p>The Nutmeg/Derek example worked because the subjects had compatible alignment and different frequency roles. The fork/spoon attempt was less successful: similar background colors and weak high-frequency separation made the fork visually disappear under the spoon's low-frequency structure. That failure is useful because it shows that hybrid images need both geometric alignment and a meaningful frequency split.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/nutmeg.jpg" alt="Nutmeg source" loading="lazy">
+    <figcaption>Nutmeg source</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/DerekPicture.jpg" alt="Derek source" loading="lazy">
+    <figcaption>Derek source</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/dernut.png" alt="Hybrid image" loading="lazy">
+    <figcaption>Hybrid image</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/dereksf.png" alt="Fourier magnitude of Derek" loading="lazy">
+    <figcaption>Fourier magnitude of Derek</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/dereklow.png" alt="Low-pass Derek" loading="lazy">
+    <figcaption>Low-pass Derek</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/nutmegs.png" alt="Fourier magnitude of Nutmeg" loading="lazy">
+    <figcaption>Fourier magnitude of Nutmeg</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/nutmeghigh.png" alt="High-pass Nutmeg" loading="lazy">
+    <figcaption>High-pass Nutmeg</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/kamalamix.png" alt="Expression hybrid" loading="lazy">
+    <figcaption>Expression hybrid</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/spork.png" alt="Fork/spoon failure case" loading="lazy">
+    <figcaption>Fork/spoon failure case</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="gaussian-and-laplacian-stacks">
+  <h2>Gaussian and Laplacian Stacks</h2>
+  <p>A Gaussian stack stores progressively smoothed versions of an image without downsampling. A Laplacian stack stores the band-pass residuals between adjacent Gaussian levels. If <span class="inline-math">G<sub>i</sub></span> is the image blurred at level <span class="inline-math">i</span>, then:</p>
+  <div class="math-block">L<sub>i</sub>=G<sub>i</sub>−G<sub>i+1</sub></div>
+  <p>The Laplacian stack separates visual content by scale. This is useful for blending because a hard mask should not be applied equally at every frequency. Low frequencies need broad transitions, while high frequencies can transition more sharply.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/guassian_apple.png" alt="Gaussian stack for apple" loading="lazy">
+    <figcaption>Gaussian stack for apple</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/guassian_orange.png" alt="Gaussian stack for orange" loading="lazy">
+    <figcaption>Gaussian stack for orange</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/laplacian_apple.png" alt="Laplacian stack for apple" loading="lazy">
+    <figcaption>Laplacian stack for apple</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/laplacian_orange.png" alt="Laplacian stack for orange" loading="lazy">
+    <figcaption>Laplacian stack for orange</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="multi-resolution-blending-results">
+  <h2>Multi-Resolution Blending Results</h2>
+  <p>For multi-resolution blending, I constructed Laplacian stacks for both source images and a Gaussian stack for the mask. At each level, the mask chooses a smoothly varying mixture of the two band-pass images:</p>
+  <div class="math-block">L<sub>i</sub><sup>blend</sup>=M<sub>i</sub>L<sub>i</sub><sup>A</sup>+(1−M<sub>i</sub>)L<sub>i</sub><sup>B</sup></div>
+  <p>The final image is reconstructed by summing the blended Laplacian levels. This produces smoother transitions than directly cutting and pasting pixels, especially when the mask is blurred at coarse scales.</p>
+  <div class="media-grid">
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/apple.jpeg" alt="Apple source" loading="lazy">
+    <figcaption>Apple source</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/orange.jpeg" alt="Orange source" loading="lazy">
+    <figcaption>Orange source</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/oraple.png" alt="Apple/orange blend" loading="lazy">
+    <figcaption>Apple/orange blend</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/lion.jpg" alt="Lion source" loading="lazy">
+    <figcaption>Lion source</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/wolf.jpg" alt="Wolf source" loading="lazy">
+    <figcaption>Wolf source</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/2.4mixedimg.png" alt="Animal blend" loading="lazy">
+    <figcaption>Animal blend</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/woody.jpg" alt="Woody source" loading="lazy">
+    <figcaption>Woody source</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/plains.jpg" alt="Plains source" loading="lazy">
+    <figcaption>Plains source</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/whitey.jpeg" alt="Custom mask" loading="lazy">
+    <figcaption>Custom mask</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/woodyintheplains.png" alt="Custom-mask composite" loading="lazy">
+    <figcaption>Custom-mask composite</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/wolflap.png" alt="Wolf Laplacian stack" loading="lazy">
+    <figcaption>Wolf Laplacian stack</figcaption>
+  </figure>
+  <figure class="media-card">
+    <img src="../../frequency-blending/media/lionlap.png" alt="Lion Laplacian stack" loading="lazy">
+    <figcaption>Lion Laplacian stack</figcaption>
+  </figure>
+</div>
+</section>
+<section class="writeup-section" id="additional-implementation-notes">
+  <h2>Additional Implementation Notes</h2>
+  <p>A subtle implementation detail in the filtering experiments is that convolution changes the interpretation of image boundaries. If a derivative filter is applied directly at the edge of an image, the missing pixels outside the image can create artificial high gradients. Padding strategy therefore matters: zero padding can introduce dark borders, while reflected or replicated padding better preserves local continuity. In these experiments, I treated the visual comparison as the main diagnostic and used consistent filtering choices across each set of outputs so the differences between raw finite differences, Gaussian smoothing, and derivative-of-Gaussian filtering were attributable to the filter design rather than inconsistent boundary behavior.</p>
+  <p>For thresholded edge maps, the threshold is not an intrinsic property of the image; it is a design parameter that trades recall for precision. A low threshold includes faint boundaries but also preserves noise, while a high threshold produces cleaner edges but can remove real low-contrast structure. This is why the derivative-of-Gaussian result is important: smoothing first changes the distribution of gradient magnitudes so a threshold can separate coherent edges from noise more reliably.</p>
+  <p>The hybrid-image experiments also depended heavily on alignment before filtering. If two images are even slightly misregistered, the high-pass layer creates doubled edges and the low-pass layer creates an incompatible global shape. For faces, I chose inputs with comparable scale and central placement. For object hybrids, the fork/spoon failure showed that shared background tone can overpower the high-frequency object, especially when one object has thin geometry and the other has a broad low-frequency silhouette.</p>
+  <p>For the multi-resolution blends, the reconstruction is effectively a sum over blended frequency bands. This is why the method handles custom masks better than direct alpha compositing: the coarse bands carry broad illumination and color transitions, while fine bands carry local edge detail. When the mask is smoothed in the Gaussian stack, each band receives a transition width appropriate to its scale. The Woody-in-the-plains result is a good example because the mask shape is irregular and would show obvious cut edges under a single-resolution blend.</p>
+  <p>Another useful way to frame the whole study is as repeated use of linear operators. Finite differences, Gaussian smoothing, high-pass extraction, and Laplacian stack construction are all convolutional operations, so they compose predictably. That lets one implementation detail carry across several experiments: once the image is represented as filtered components, the same reconstruction logic can be used for sharpening, hybridization, or blending. The main difference is which components are amplified, suppressed, or mixed with another image.</p>
+</section>
+<section class="writeup-section" id="technical-takeaways-and-future-work">
+  <h2>Technical Takeaways and Future Work</h2>
+  <p>The throughline is that many image operations are easier to reason about when stated as frequency manipulation. Derivatives emphasize high frequencies, Gaussian filters suppress them, unsharp masking amplifies them, and Laplacian stacks isolate them by scale.</p>
+  <p>Future work would add interactive cutoff selection, automatic alignment before hybrid-image generation, and exposure/color normalization before blending.</p>
+</section>
+    </article>
+  </div>
+</main>
+<footer>Technical portfolio by Aadit Sood.</footer>
+</body>
+</html>
